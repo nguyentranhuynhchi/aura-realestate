@@ -5,42 +5,33 @@ import csv
 import re
 from curl_cffi import requests 
 from bs4 import BeautifulSoup
+from playwright.sync_api import sync_playwright
 
-OUTPUT_CSV = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data", "raw", "houses_raw.csv"))
+OUTPUT_CSV = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data", "raw", "new_data.csv"))
 
 BASE_URL = "https://batdongsan.com.vn/ban-can-ho-chung-cu-tp-ho-chi-minh/p{page}?cIds=650,362,41,325,163,575,361,40,283,44,562,45,48&vrs=1"
 
-COOKIE_STR = (
-    "_gcl_au=1.1.1992001346.1779449118; _ga=GA1.1.1237519992.1779449119; __uidac=016a103d1fa3363e915f0765a11bab37; "
-    "__admUTMtime=1779449119; _fbp=fb.2.1779449119684.495652868306778629; _tt_enable_cookie=1; _ttp=01KS7PXHQF5TCXK4ENSNG4XR1G_.tt.2; "
-    "__iid=6461; __iid=6461; __su=0; __su=0; __RC=5; __R=3; "
-    "_hjSessionUser_1708983=eyJpZCI6ImNhZGNlZGViLWFlZWMtNTZkNy1hYjFhLWEwZGUwNWVkNGRiOCIsImNyZWF0ZWQiOjE3Nzk0NDkxMTkxNDEsImV4aXN0aW5nIjp0cnVlfQ==; "
-    "__tb=0; ajs_anonymous_id=7b58b2db-2982-41ed-b388-359478a0dba1; userinfo=4c0906ae13b14a369d20a7e99a1133aa@bds.lc; c_u_id=5195219; "
-    "BDS.UMS.Cookie=CfDJ8GsOAEqwP6xPtxb1UfIzE281cgGmTyFu522mq1HGUt-9tyToBhM-tIiwuHK0_hAtrY0xmnVgXHprrJnrHh-r8BA1sRFYRgOifJPdRhLlJNiz3JzcZr-NhYZyXe0loWV7TSg7961cGtXRIzGV1Md_72fu7fySg64HQs2m3lB72K-Gp-gh-GBY9Lyjk1NMZvNlc3k90VuVuOPfGAxTdI4K7HUg3l20ZDLJ-ceiQUH7YMo5ZobmFjQOi9u9n4E_qnwxjIJcYAcgcxTUZWJlFE-8ZOtLwEgtsAhj1kW2IuPYXMfDhoOR1rXPQSXI9BIOq-PP25aIPyIAZxrwWFCylBozSZXvyhvhF1H2fVX0lxkSetWn1YSVaTpDgnTyWloaZEKkc8--WsKVaKXRHU0qwuRlUxhLEQ74W39xu2PO60o08t3VMbmBIAIbcHJ2Baac6Ry73GpcgflaFLKomK7GZZKhiUo-njk8LEUTeGvN8Q8Pw220YU4cS9MEpJE7BD0X-LTz0p3QyS80pizlZDJ5hyt0PuweAPNh6WYjUGQp6Y0HlwhHA35mTC4E_UOukEyvknqjxHJi8mC7d_5uX3bgd6UGPGjjfUO6tgFJtOr6d-Ix2WbNG9G-axNsqdeym6TdZLShkPK6qJfgGuHXrE93qMoeI-0xNvdhzx55PWPF7gYH-OHzxf_RCF9cc4ewqu_rUGnsrw; "
-    "ajs_user_id=5195219; clientIp=2001%3Aee0%3A4f0c%3A2070%3Ae2%3A4a59%3A66ed%3Add5b; con.unl.lat=1779555600; con.unl.sc=3; __IP=0; "
-    "con.ses.id=06381f08-a6b0-432e-b9c5-4e878c33e369; "
-    "_cfuvid=6xZOTlUHR31nlVn4R44hG0YPM3DjDoOC8rL6es2puWc-1779610535.265167-1.0.1.1-w3TMuHOmzJs5A2d6HrCMAUveE1AzwgJoaxHtFvxI6n8; "
-    "refreshToken=oqWCkpJjExuKJW6HESokZkcg8JzVHNXhRFeJa4cMBJ8; "
-    "accessToken=eyJhbGciOiJSUzI1NiIsImtpZCI6Ijg5Mzg0OTU1MkNDRTExMUFDMjc5RjUyNDI3RUEwMUY5QzdDMzAxNTQiLCJ0eXAiOiJhdCtqd3QiLCJ4NXQiOiJpVGhKVlN6T0VSckNlZlVrSi1vQi1jZkRBVlEifQ.eyJuYmYiOjE3Nzk2MTA1MzUsImV4cCI6MTc3OTYxNDEzNSwiaXNzIjoiaHR0cDovL2F1dGhlbnRpY2F0aW9uLmJkcy5sYyIsImF1ZCI6IkFwaUdhdGV3YXkiLCJjbGllbnRfaWQiOiIwM2QwZjkwNS0xMGM5LTRkMjEtOTBmNS0xMGI3OGUwYTk4OWMiLCJzdWIiOiI1MTk1MjE5IiwiYXV0aF90aW1lIjoxNzc5NTcyMjExLCJpZHAiOiJsb2NhbCIsInByZWZlcnJlZF91c2VybmFtZSI6IjAzMzk3MzcyNzUiLCJlbWFpbCI6IjRjMDkwNmFlMTNiMTRhMzY5ZDIwYTdlOTlhMTEzM2FhQGJkcy5sYyIsInNjb3BlIjpbIm9wZW5pZCIsInByb2ZpbGUiLCJBcGlHYXRld2F5Iiwib2ZmbGluZV9hY2Nlc3MiXSwiYW1yIjpbInB3ZCJdfQ.QHd08SydFjRfpMJfhrk7uUlnt4CalOleWs1KOy9sV-jCkF0iFl4_KVw4lrtlLgEbUN0VnlF3VAC5HOlpSnEKrFQyXL2VKoarMMxPaySs_Y8feQmb-2AHKLKous5yw2ZVtFhWeHLPIGXKqELoMByHBVDG7ihNsl9pHL076182jU5UFgkg_4Xl1hn9IS3oNU31pawae8xDAvC0sZWMIcNZcx_UOzbZYrJ0A8ErKKTkUSdVS9lZJKqkvBsatrEHfAPni_Ras5VSQNG43h2MP1AI_xM4Q3sxYKewW04BX2OHFEFOb94y0K4q7F-9iX9DXtAIy6XkCSHp7w1Eed6kbGtOVA; "
-    "cf_clearance=kAI9b_dXNU4mh26Luj8uBDSkS2y37v5inDpWrQEjYDc-1779610538-1.2.1.1-dZsYoa2_yVCn8LuD9ix1xLbaj_by2FoqMX6mHh6TBg6uJ28B839ROGm8bXeGZHrx28MD8iokjoZ8ucWg.tsTzdktQdzlyn24tOdfKI5_ln4.JYzV7xQcdBr353I1OmTr9Omqq_MlTKtstp1bU4mBI3TnfU4jwfoEq.lDD_XvqKYxKdiHtR5RrNGmVZrw.RbOFpcZPhJ7faq0olTkkS2DQpMftCuK2c.htXrfjycB97QXFAJwVE9nnkkKlpNsEdEHNJRp87gL4hUbcbk8HvXO_brmKUPtNrFEU8SdyWWMo1dIFuHORjyYvMoybyt0xyxcblz5Xu_dN35qo8lSnsYK0w; "
-    "_hjSession_1708983=eyJpZCI6ImU4MDFlNGEwLWYyZDEtNGUzNC1hOTg0LWMxYzJkZDBlNjI0ZiIsImMiOjE3Nzk2MTA1MzgyMTMsInMiOjAsInIiOjAsInNiIjowLCJzciI6MCwic2UiOjAsImZzIjowLCJzcCI6MX0=; "
-    "_hjHasCachedUserAttributes=true; __gads=ID=21ff3e925794927f:T=1779449118:RT=1779610538:S=ALNI_MbEy5l5Bx6zxzcixJ1-nVVXN3-tKw; "
-    "__gpi=UID=000014224ec1e44c:T=1779449118:RT=1779610538:S=ALNI_MaJXPhbuwoyDAlFKzUmooyJjaQAQw; __eoi=ID=b002f93955585dab:T=1779449118:RT=1779610538:S=AA-AfjZRoV9dtqQInoqo6mjP7rS-; "
-    ".AspNetCore.Antiforgery.VyLW6ORzMgk=CfDJ8Anygllkf01LmPoxwxDcQG1PQDZV1rL34WOGDRnn9foznvO4lq3-m93uSGZbD6LXWdWJkcim-G_Y4HcXwwWVsEt9iUT3p-yn-lB2r4YncmZQSt-I4ZkU8Lo7uQHXF12HgqTemciMlTZCm7qgK2A4fZ4; "
-    "ab.storage.deviceId.892f88ed-1831-42b9-becb-90a189ce90ad=%7B%22g%22%3A%22159e23a8-6670-7390-6d97-c03a28bfebb4%22%2C%22c%22%3A1779449121090%2C%22l%22%3A1779610541437%7D; "
-    "ab.storage.userId.892f88ed-1831-42b9-becb-90a189ce90ad=%7B%22g%22%3A%225195219%22%2C%22c%22%3A1779547020730%2C%22l%22%3A1779610541438%7D; SEARCH_NEW_AND_OLD_ADDRESS=true; "
-    "ab.storage.sessionId.892f88ed-1831-42b9-becb-90a189ce90ad=%7B%22g%22%3A%22b0f7c838-8f14-a33f-a65b-9aaa168d9dfd%22%2C%22e%22%3A1779612355932%2C%22c%22%3A1779610541435%2C%22l%22%3A1779610555932%7D; "
-    "__uif=__uid%3A7694491193484553988%7C__ui%3A-1%7C__create%3A1779449120; "
-    "AWSALB=heX47VkWfLRCVILZdMvtL5jhstA2Bq1Wzui+prqIk4U6iEzvPOxuxyTZ1VzCkV/Fh70q135piQWq2xamGp39OP3SWnTdi65ghvawC4mMSvesHM2W+iaG5Y7xBvJi; "
-    "AWSALBCORS=heX47VkWfLRCVILZdMvtL5jhstA2Bq1Wzui+prqIk4U6iEzvPOxuxyTZ1VzCkV/Fh70q135piQWq2xamGp39OP3SWnTdi65ghvawC4mMSvesHM2W+iaG5Y7xBvJi; "
-    "con.unl.usr.id=%7B%22key%22%3A%22userId%22%2C%22value%22%3A%227b58b2db-2982-41ed-b388-359478a0dba1%22%2C%22expireDate%22%3A%222027-05-24T15%3A15%3A56.7421101Z%22%7D; "
-    "con.unl.cli.id=%7B%22key%22%3A%22clientId%22%2C%22value%22%3A%22a0ddb49d-794e-44bd-bc00-5773f1b00652%22%2C%22expireDate%22%3A%222027-05-24T15%3A15%3A56.7421302Z%22%7D; "
-    "exp.stg.stableid=%7B%22key%22%3A%22stableID%22%2C%22value%22%3A%2259eed76b-b8f1-4eb1-9a98-6b4cc67278e2%22%2C%22expireDate%22%3A%222027-05-24T15%3A15%3A56.742253Z%22%7D; "
-    "_ga_HTS298453C=GS2.1.s1779610537$o5$g1$t1779610556$j41$l0$h0$dpsWG8LySwmelmuMVWsEE60pF3ER1xz930Q; "
-    "ttcsid=1779610538678::smzuGttOokCJyY5Cc26M.5.1779610563938.0::1.14937.16949::25253.10.315.9044::24366.21.8800; "
-    "ttcsid_CHHL1E3C77U1H95PSJM0=1779610538677::A3QNTVsm_3uzScplJlD9.5.1779610563938.1; "
-    "ph_phc_Twg4bLVDz7InVj8BSvMQBW4gX1KtsbnaOKWSdn0SupU_posthog=%7B%22%24device_id%22%3A%22019e4f6e-bd78-7930-a7e9-73145c6fc01e%22%2C%22distinct_id%22%3A%225195219%22%2C%22%24sesid%22%3A%5B1779610563955%2C%22019e590d-cd7a-7e1c-83fd-cde510178480%22%2C1779610537327%5D%2C%22%24epp%22%3Atrue%2C%22%24initial_person_info%22%3A%7B%22r%22%3A%22%24direct%22%2C%22u%22%3A%22https%3A%2F%2Fbatdongsan.com.vn%2F%22%7D%2C%22%24user_state%22%3A%22identified%22%7D"
-)
+def get_fresh_cookie():
+    """Hàm bật trình duyệt ảo ngầm để lấy Cookie tươi mới hoàn toàn tự động"""
+    print("[PLAYWRIGHT] Đang kích hoạt trình duyệt ẩn để bốc Cookie tự động...")
+    try:
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True) # headless=True để chạy ẩn không tốn RAM
+            context = browser.new_context()
+            page = context.new_page()
+            
+            # Truy cập trang chủ để kích hoạt cấp session/cookie mới
+            page.goto("https://batdongsan.com.vn", wait_until="networkidle", timeout=20000)
+            
+            cookies = context.cookies()
+            cookie_string = "; ".join([f"{c['name']}={c['value']}" for c in cookies if ord(c['name']) < 128 and ord(c['value']) < 128])
+            
+            browser.close()
+            print("[SUCCESS] Đã bốc Cookie tự động thành công từ Playwright!")
+            return cookie_string
+    except Exception as e:
+        print(f"[WARNING] Playwright không lấy được cookie: {e}. Hệ thống sẽ chạy không có cookie.")
+        return ""
 
 FIELDNAMES = [
     "id", "title", "price_raw", "area_raw", "address_raw", "url", "seller_name", 
@@ -70,7 +61,7 @@ def scrape_v3(start_page, end_page):
     os.makedirs(os.path.dirname(OUTPUT_CSV), exist_ok=True)
     file_exists = os.path.isfile(OUTPUT_CSV)
     
-    clean_cookie = sanitize_cookie(COOKIE_STR)
+    clean_cookie = get_fresh_cookie()
     headers = {
         "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
         "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",

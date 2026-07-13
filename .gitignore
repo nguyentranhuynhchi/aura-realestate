@@ -1,1 +1,30 @@
-.env 
+# Môi trường ảo (Python Virtual Environments)
+.venv/
+venv/
+ENV/
+pyvenv.cfg
+
+# Bảo mật (Secrets)
+.env
+*.env
+
+# Dữ liệu và Docker Volumes (Data & Storage)
+data/
+docker_data/
+model_registry/
+pipeline_log.json
+
+# File rác hệ thống và IDE (OS & IDE temporary files)
+.vscode/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.DS_Store
+Thumbs.db
+tempCodeRunnerFile.python
+
+# Thư mục build của Nginx/Frontend nếu có phát sinh cache
+.next/
+dist/
+node_modules/
