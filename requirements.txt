@@ -1,0 +1,10 @@
+requests==2.31.0
+beautifulsoup4==4.12.3
+selenium==4.18.1
+pandas==2.2.1
+undetected-chromedriver==3.5.5
+selenium-stealth==1.0.6
+curl_cffi==0.6.2
+playwright==1.49.0
+# Thư viện phục vụ bộ lập lịch tự động (Scheduler Service)
+schedule==1.2.2

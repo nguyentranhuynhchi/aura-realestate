@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/models:/app/models
+      - ./pipelines:/app/pipelines  
+    env_file:
+      - ./backend/.env
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+  chromadb:
+    image: chromadb/chroma
+    ports:
+      - "8001:8000"
+    volumes:
+      # Ánh xạ chuẩn vào thư mục /data mà Agent vừa tìm ra
+      - ./docker_data/chromadb_data:/data
+    environment:
+      - IS_PERSISTENT=TRUE
+      - PERSISTENT_DIR=/data
+      - ANONYMIZED_TELEMETRY=FALSE
