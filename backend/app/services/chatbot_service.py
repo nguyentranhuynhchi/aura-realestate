@@ -103,7 +103,7 @@ class ChatbotService:
             else:
                 context = f"HỆ THỐNG PHÁT HIỆN: KHÔNG CÓ BẤT ĐỘNG SẢN NÀO TRONG KHO THỎA MÃN ĐÚNG TIÊU CHÍ KHÁCH HỎI.\nThông tin kho: Tổng kho hiện quản lý {total_in_db} chunks."
 
-            # 4. Định nghĩa System Instruction động nghiêm ngặt theo kịch bản mới của ní
+            # 4. Định nghĩa System Instruction động nghiêm ngặt theo kịch bản mới 
             system_instruction = (
                 "Bạn là một Chuyên viên tư vấn bất động sản trung gian uy tín, khéo léo của Aura Realestate tại thị trường TP.HCM.\n\n"
                 

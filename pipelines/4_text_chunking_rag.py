@@ -11,7 +11,7 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 RAW_NEW_DATA = os.path.abspath(os.path.join(CURRENT_DIR, "..", "data", "raw", "new_data.csv"))
 
 # =========================================================================
-# BÊ NGUYÊN CÁC HÀM TRÍCH XUẤT LÀM SẠCH TỪ FILE 1_DATA_PREPROCESSING.PY
+# CÁC HÀM TRÍCH XUẤT LÀM SẠCH TỪ FILE 1_DATA_PREPROCESSING.PY
 # =========================================================================
 def clean_price(price_str):
     if pd.isna(price_str) or 'thỏa thuận' in str(price_str).lower():

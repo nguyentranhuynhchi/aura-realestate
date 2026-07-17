@@ -92,8 +92,8 @@ const PredictPage = () => {
                 </div>
 
                 <div className="text-[11px] text-slate-400 flex justify-between items-center border-t border-slate-50 pt-4">
-                    <span>Độ tin cậy: ~95%</span>
-                    <span>Biên độ sai số tối đa: ±5%</span>
+                    <span>_</span>
+                    <span>_</span>
                 </div>
             </div>
         </div>

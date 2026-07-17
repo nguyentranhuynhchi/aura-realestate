@@ -6,7 +6,7 @@ from app.api import predict, chatbot
 
 app = FastAPI(
     title="AI Prediction & RAG Chatbot API",
-    description="Backend service phục vụ dự đoán và chatbot tư vấn pháp luật",
+    description="Backend service phục vụ dự đoán và chatbot tư vấn",
     version="1.0.0"
 )
 
