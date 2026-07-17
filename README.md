@@ -26,32 +26,32 @@ Dự án là nơi giao thoa 3 mảng năng lực AI Engineer: **Data Engineering
 Tách thành **2 sơ đồ độc lập** — luồng dữ liệu/MLOps (offline, vận hành theo lịch tự động) và luồng phục vụ (online, theo request) — mỗi sơ đồ trả lời một câu hỏi, dễ đọc hơn gộp chung.
 
 ### 2.1 Luồng Dữ Liệu & MLOps Pipeline (Offline, Tự Động Hóa Theo Lịch)
-
+ 
 ```mermaid
 flowchart TD
     SCHED_D(["⏰ Cron — chạy hàng ngày"])
     SCHED_W(["⏰ Trigger huấn luyện — mỗi 7 ngày"])
-
+ 
     SCHED_D --> A[Crawler<br/>Cookie Harvesting + TLS Impersonation + BeautifulSoup]
     A --> B[Raw Dataset<br/>append hàng ngày]
-
+ 
     B --> C{Phân đoạn theo URL}
     C --> C1[Đất nền]
     C --> C2[Nhà riêng]
     C --> C3[Chung cư]
-
+ 
     C2 --> D[Tiền xử lý & Trích xuất<br/>Text Parsing • Log-transform • VIF]
     D --> E[(Dataset sạch<br/>tích lũy hàng ngày)]
-
-    E --> I[Text Chunking<br/>chunk_size=600, overlap=100]
+ 
+    C2 --> I[Text Chunking<br/>trên description/surrounding_area thô<br/>chunk_size=600, overlap=100]
     I --> J[Embedding<br/>all-MiniLM-L6-v2]
     J --> K[(ChromaDB<br/>cập nhật hàng ngày)]
-
+ 
     SCHED_W --> F
     E --> F[Train / Val / Test<br/>60% / 20% / 20%]
     F --> G[Huấn luyện 6 kiến trúc<br/>chọn Stacking làm champion]
     G --> H[(Model Registry<br/>.pkl versioned)]
-
+ 
     H -.artifact.-> M[FastAPI Serving Layer]
     K -.artifact.-> M
 ```
