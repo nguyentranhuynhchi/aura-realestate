@@ -15,7 +15,7 @@ async def predict(payload: PredictRequest):
             "success": True,
             "data": {
                 "predicted_price": predicted_price,
-                "unit": "Tỷ VNĐ" # hoặc đơn vị phù hợp với bài toán của bạn
+                "unit": "Tỷ VNĐ" 
             }
         }
     except Exception as e:

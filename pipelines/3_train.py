@@ -72,7 +72,7 @@ rmse_challenger = root_mean_squared_error(y_test, preds_test)
 print(f"\n [CHALLENGER METRICS] Mô hình ứng viên mới đạt R2 trên tập Test = {r2_challenger:.4f}")
 
 # =================================================================
-# 🌟 MỤC 6: LƯU SẢN PHẨM MỚI VÀO REGISTRY TRƯỚC (CHƯA ĐỘNG VÀO VOLUME)
+#  MỤC 6: LƯU SẢN PHẨM MỚI VÀO REGISTRY TRƯỚC (CHƯA ĐỘNG VÀO VOLUME)
 # =================================================================
 # Tạo folder lịch sử hiện tại nếu chưa có
 os.makedirs(CURRENT_EXP_DIR, exist_ok=True)
@@ -95,7 +95,7 @@ print(f"\n[REGISTRY] Đã đóng băng mô hình ứng viên mới tại: model_
 
 
 # =================================================================
-#  MỤC 7: ĐẤU TRƯỜNG ĐỐI SÁNH THẬT & PHÂN PHỐI RA VOLUME BACKEND
+#  MỤC 7:  ĐỐI SÁNH THẬT & PHÂN PHỐI RA VOLUME BACKEND
 # =================================================================
 # Định nghĩa đường dẫn đích đến của Volume Backend thực tế
 VOLUME_MODEL_PATH = os.path.join(MODEL_DIR, "best_stacking_regressor.pkl")

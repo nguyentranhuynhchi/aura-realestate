@@ -60,7 +60,7 @@ const ChatbotPage = () => {
                 {isLoading && (
                     <div className="flex items-start gap-3 my-2">
                         <div className="px-4 py-3 bg-white text-slate-400 rounded-2xl border border-slate-100 text-xs italic shadow-sm animate-pulse">
-                            Aura AI đang truy vấn dữ liệu nền...
+                            Aura AI đang tìm thông tin phù hợp với yêu cầu của bạn, vui lòng chờ trong giây lát nhé...
                         </div>
                     </div>
                 )}

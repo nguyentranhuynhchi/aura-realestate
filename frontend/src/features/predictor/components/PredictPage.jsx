@@ -16,7 +16,7 @@ const PredictPage = () => {
             const price = await predictService.predictPrice(dataInput);
             setResultPrice(price);
         } catch (error) {
-            // SỬA DÒNG NÀY: Kiểm tra nếu là Object thì ép thành chuỗi chữ đọc được
+            // Kiểm tra nếu là Object thì ép thành chuỗi chữ đọc được
             const message = error.message && typeof error.message === 'object' 
                 ? JSON.stringify(error.message) 
                 : String(error.message || 'Lỗi kết nối máy chủ AI.');
@@ -78,7 +78,7 @@ const PredictPage = () => {
                 </div>
 
                 <div className="text-[10px] text-gray-500 text-center border-t border-gray-800 pt-2">
-                    Sai số mô hình ước tính: ±5% tùy biến động thị trường.
+                    Sai số mô hình có thể có sự biến động theo thị trường.
                 </div>
             </div>
         </div>

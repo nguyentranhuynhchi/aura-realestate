@@ -17,7 +17,7 @@ FROM nginx:alpine
 # Sao chép file cấu hình Nginx tùy chỉnh để hỗ trợ Single Page Application (SPA) Routing
 COPY --from=build-stage /app/dist /usr/share/nginx/html
 
-# THÊM DÒNG NÀY: Ghi đè cấu hình default của Nginx để kích hoạt try_files phục vụ React Router
+# Ghi đè cấu hình default của Nginx để kích hoạt try_files phục vụ React Router
 RUN echo 'server { \
     listen 80; \
     location / { \

@@ -19,14 +19,14 @@ def trigger_pipeline():
         print(f" [ERROR] Lỗi hệ thống: {e}")
 
 # ==========================================
-# CẤU HÌNH THỜI GIAN CHẠY TỰ ĐỘNG TẠI ĐÂY
+# CẤU HÌNH THỜI GIAN CHẠY TỰ ĐỘNG 
 # ==========================================
 
 # 1. Cấu hình thực tế (Chạy cào dữ liệu hằng ngày vào lúc 00:00 đêm)
 # schedule.every().day.at("00:00").do(trigger_pipeline)
 schedule.every(10).seconds.do(trigger_pipeline)
 
-# 2. Cấu hình kiểm thử (Ní bỏ dấu # ở dòng dưới nếu muốn test thử xem cứ mỗi 5 phút bot có tự chạy không nhé)
+# 2. Cấu hình kiểm thử 
 # schedule.every(5).minutes.do(trigger_pipeline)
 
 print("=" * 60)
