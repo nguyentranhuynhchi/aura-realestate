@@ -10,7 +10,6 @@ def trigger_pipeline():
     print(f"\n[{current_time}] ĐÚNG GIỜ HẸN! Đang kích hoạt Aura MLOps Pipeline...")
     
     try:
-        # Sử dụng sys.executable để đảm bảo gọi đúng môi trường Python hiện tại của máy thật
         result = subprocess.run([sys.executable, "run_pipeline.py"], check=True)
         print(f" [{datetime.now().strftime('%H:%M:%S')}] Toàn bộ Pipeline đã hoàn thành chu trình tự động!")
     except subprocess.CalledProcessError as e:
@@ -19,23 +18,26 @@ def trigger_pipeline():
         print(f" [ERROR] Lỗi hệ thống: {e}")
 
 # ==========================================
-# CẤU HÌNH THỜI GIAN CHẠY TỰ ĐỘNG 
+# CẤU HÌNH THỜI GIAN CHẠY TỰ ĐỘNG
 # ==========================================
 
-# 1. Cấu hình thực tế (Chạy cào dữ liệu hằng ngày vào lúc 00:00 đêm)
-# schedule.every().day.at("00:00").do(trigger_pipeline)
-schedule.every(10).seconds.do(trigger_pipeline)
-
-# 2. Cấu hình kiểm thử 
-# schedule.every(5).minutes.do(trigger_pipeline)
+# 1. Đặt lịch chạy định kỳ 00:00 hằng ngày
+schedule.every().day.at("00:00").do(trigger_pipeline)
 
 print("=" * 60)
 print(" [AURA SCHEDULER SERVICE] Đã kích hoạt bộ canh giờ tự động ngầm!")
-print(f" Trạng thái: Đang ngồi canh lịch (00:00 hằng ngày)...")
+print(" Trạng thái: Đang ngồi canh lịch (00:00 hằng ngày)...")
 print("  Lưu ý: Giữ Terminal này luôn bật để bộ lập lịch hoạt động.")
 print("=" * 60)
 
-# Vòng lặp vô hạn chạy ngầm để liên tục kiểm tra đồng hồ máy tính
+# ==========================================
+# TEST MODE: CHẠY LUÔN 1 LẦN NGAY KHI STARTUP
+# ==========================================
+print("\n[TEST MODE] Chạy thử nghiệm 1 lần duy nhất ngay khi vừa khởi động...")
+trigger_pipeline()
+print("[TEST MODE] Đã chạy xong lượt test đầu tiên! Chuyển sang chế độ chờ lịch 00:00...\n")
+
+# Vòng lặp vô hạn chạy ngầm để ngồi canh đến 00:00
 while True:
     schedule.run_pending()
-    time.sleep(5)  # Cứ 30 giây kiểm tra lịch hẹn một lần (không hề tốn CPU)
+    time.sleep(10)  # Check lịch mỗi 10s

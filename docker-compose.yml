@@ -21,7 +21,7 @@ services:
       - backend
 
   chromadb:
-    image: chromadb/chroma
+    image: chromadb/chroma:0.4.24
     ports:
       - "8001:8000"
     volumes:
@@ -31,3 +31,27 @@ services:
       - IS_PERSISTENT=TRUE
       - PERSISTENT_DIR=/data
       - ANONYMIZED_TELEMETRY=FALSE
+  
+  ml_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    container_name: aura_ml_worker
+    volumes:
+      # Đồng bộ code và log để dễ debug
+      - ./pipelines:/app/pipelines
+      - ./crawler:/app/crawler
+      - ./scripts:/app/scripts
+      - ./run_pipeline.py:/app/run_pipeline.py
+      - ./scheduler_service.py:/app/scheduler_service.py
+      - ./pipeline_log.json:/app/pipeline_log.json
+      # Ánh xạ các thư mục chứa dữ liệu và mô hình để Backend nhận được file khi train xong
+      - ./data:/app/data
+      - ./backend/models:/app/backend/models
+      - ./model_registry:/app/model_registry
+    environment:
+      # Khai báo host ChromaDB để RAG pipeline biết đường kết nối đến container chromadb
+      - CHROMA_HOST=chromadb 
+      - CHROMA_PORT=8000
+    depends_on:
+      - chromadb

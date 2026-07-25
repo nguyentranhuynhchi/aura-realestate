@@ -424,7 +424,7 @@ if __name__ == '__main__':
         if not df_clean.empty:
             print("\n=== [PREVIEW] DÒNG DỮ LIỆU MỚI XUẤT SẮC VƯỢT QUA BỘ LỌC ===")
             # .to_markdown() giúp in ra dạng bảng cực kỳ đẹp và dễ nhìn trong Terminal
-            print(df_clean.to_markdown(index=False))
+            print(df_clean.head())
             print("============================================================\n")
                 
     # Lọc trùng lặp dựa trên cột 'id', giữ lại bản ghi xuất hiện sau cùng (keep='last')

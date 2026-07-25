@@ -67,17 +67,19 @@ def main():
     
     # --- LUỒNG HÀNG NGÀY: CÀO DATA & LÀM SẠCH ---
     if today > last_crawl:
-        print(f"\n[STATUS] Phát hiện ngày mới chưa cào dữ liệu (Lần cuối: {last_crawl}).")
+        print(f"\n[STATUS] Phát hiện ngày mới chưa cào (Lần cuối: {last_crawl}).")
         os.makedirs(DATA_DIR, exist_ok=True)
-        if run_script(CRAWLER_SCRIPT, args=["1", "3"]): 
-            if run_script(STAGE_1_PREPROCESS):
-                print("\n[RAG FLOW] Kích hoạt tiến trình chunking và đồng bộ Vector Database...")
-                run_script(STAGE_4_RAG, args=["daily"])
-                clear_new_data()
-                update_log("last_crawl", str(today))
-                print(f"[SUCCESS] Hoàn thành xong luồng cào dữ liệu hôm nay.")
-    else:
-        print(f"\n[STATUS] Hôm nay dữ liệu đã được thu thập. Bỏ qua luồng Crawler.")
+        
+        # 1. Cố gắng cào data (lỗi hay bị chặn cũng không sao, không để làm ngắt pipeline)
+        run_script(CRAWLER_SCRIPT, args=["1", "3"])
+        
+        # 2. Luôn luôn chạy tiền xử lý dữ liệu nếu file new_data.csv có dữ liệu
+        if run_script(STAGE_1_PREPROCESS):
+            print("\n[RAG FLOW] Kích hoạt tiến trình chunking và đồng bộ Vector Database...")
+            run_script(STAGE_4_RAG, args=["init_all"])
+            clear_new_data()
+            update_log("last_crawl", str(today))
+            print(f"[SUCCESS] Hoàn thành xong luồng cào và xử lý hôm nay.")
 
     # --- LUỒNG ĐỊNH KỲ: RETRAIN MÔ HÌNH ML ---
     if (today - last_train).days >= 7:

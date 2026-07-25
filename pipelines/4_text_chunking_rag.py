@@ -1,3 +1,9 @@
+# === FIX LỖI SQLITE3 CHO CHROMADB ===
+__import__('pysqlite3')
+import sys
+sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+# =====================================
+
 import os
 import sys
 import re
@@ -116,7 +122,9 @@ def main():
         print("[INFO] Không có dữ liệu để nạp.")
         return
 
-    chroma_client = chromadb.HttpClient(host="localhost", port=8001)
+    chroma_host = os.environ.get("CHROMA_HOST", "localhost")
+    chroma_port = int(os.environ.get("CHROMA_PORT", 8001))
+    chroma_client = chromadb.HttpClient(host=chroma_host, port=chroma_port)
     sentence_transformer_ef = embedding_functions.SentenceTransformerEmbeddingFunction(model_name="all-MiniLM-L6-v2")
     collection = chroma_client.get_or_create_collection(name="realestate_collection", embedding_function=sentence_transformer_ef)
 
