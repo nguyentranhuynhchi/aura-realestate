@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+# 1
   backend:
     build: 
       context: ./backend
@@ -8,18 +9,24 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./backend/models:/app/models
+      - ./backend:/app
       - ./pipelines:/app/pipelines  
+    environment:
+      - VLLM_HOST=http://vllm:8000/v1
+      - VLLM_API_KEY=vllm-local
     env_file:
       - ./backend/.env
-
+# 2
   frontend:
     build: ./frontend
     ports:
       - "3000:80"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
     depends_on:
       - backend
-
+# 3
   chromadb:
     image: chromadb/chroma:0.4.24
     ports:
@@ -31,27 +38,94 @@ services:
       - IS_PERSISTENT=TRUE
       - PERSISTENT_DIR=/data
       - ANONYMIZED_TELEMETRY=FALSE
-  
-  ml_worker:
+# 4  
+  postgres:
+    image: postgres:15-alpine
+    container_name: aura_postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./docker_data/postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=aura_realestate_db
+# chỉ là khuân mẫu      
+  airflow-common: &airflow-common
     build:
       context: .
       dockerfile: Dockerfile.worker
-    container_name: aura_ml_worker
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://postgres:postgres@postgres:5432/airflow_db
+      - AIRFLOW__CORE__FERNET_KEY=${AIRFLOW_FERNET_KEY}
+      - AIRFLOW__WEBSERVER__SECRET_KEY=${AIRFLOW_WEBSERVER_SECRET_KEY}
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
+      - AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION=True
+      - PYTHONPATH=/app
+      - CHROMA_HOST=chromadb
+      - CHROMA_PORT=8000
+      # --- CẤU HÌNH GỬI GMAIL ALERT ---
+      - AIRFLOW__SMTP__SMTP_HOST=smtp.gmail.com
+      - AIRFLOW__SMTP__SMTP_STARTTLS=True
+      - AIRFLOW__SMTP__SMTP_SSL=False
+      - AIRFLOW__SMTP__SMTP_USER=${AIRFLOW_SMTP_USER}
+      - AIRFLOW__SMTP__SMTP_PASSWORD=${AIRFLOW_SMTP_PASSWORD}
+      - AIRFLOW__SMTP__SMTP_PORT=587
+      - AIRFLOW__SMTP__SMTP_MAIL_FROM=${AIRFLOW_SMTP_MAIL_FROM}
     volumes:
-      # Đồng bộ code và log để dễ debug
+      - ./dags:/opt/airflow/dags
       - ./pipelines:/app/pipelines
       - ./crawler:/app/crawler
-      - ./scripts:/app/scripts
-      - ./run_pipeline.py:/app/run_pipeline.py
-      - ./scheduler_service.py:/app/scheduler_service.py
-      - ./pipeline_log.json:/app/pipeline_log.json
-      # Ánh xạ các thư mục chứa dữ liệu và mô hình để Backend nhận được file khi train xong
       - ./data:/app/data
       - ./backend/models:/app/backend/models
       - ./model_registry:/app/model_registry
-    environment:
-      # Khai báo host ChromaDB để RAG pipeline biết đường kết nối đến container chromadb
-      - CHROMA_HOST=chromadb 
-      - CHROMA_PORT=8000
+      - ./pipeline_log.json:/app/pipeline_log.json
     depends_on:
+      - postgres
       - chromadb
+# 5
+  airflow-webserver:
+    <<: *airflow-common
+    container_name: aura_airflow_webserver
+    command: airflow webserver
+    ports:
+      - "8080:8080"
+    restart: always
+# 6 
+  airflow-scheduler:
+    <<: *airflow-common
+    container_name: aura_airflow_scheduler
+    command: airflow scheduler
+    restart: always
+# 7
+  vllm:
+    image: vllm/vllm-openai:v0.6.3.post1
+    container_name: aura_vllm_server
+    runtime: nvidia
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    environment:
+      - HUGGING_FACE_HUB_TOKEN=${HF_TOKEN:-}
+    volumes:
+      - ~/.cache/huggingface:/root/.cache/huggingface
+    ports:
+      - "8002:8000"
+    ipc: host
+    command: >
+      --model Qwen/Qwen2.5-1.5B-Instruct-AWQ
+      --quantization awq
+      --dtype half
+      --max-model-len 4096
+      --gpu-memory-utilization 0.80
+      --swap-space 1
+      --enforce-eager
+      --host 0.0.0.0
+      --port 8000
+    restart: unless-stopped

@@ -6,29 +6,31 @@ WORKDIR /app
 
 # Biến môi trường giúp Python in log ra terminal ngay lập tức (không bị buffer)
 ENV PYTHONUNBUFFERED=1
+ENV AIRFLOW_HOME=/opt/airflow
 
-# Cài đặt các gói hệ thống cơ bản cần thiết cho việc crawl dữ liệu (Playwright/Selenium)
+# Cài đặt các gói hệ thống cơ bản cần thiết (Playwright + thư viện build psycopg2)
 RUN apt-get update && apt-get install -y \
-    wget curl gnupg libgomp1 \
+    wget curl gnupg libgomp1 libpq-dev gcc \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy file requirements vào container
 COPY requirements.txt .
 
-# 1. Cài đặt PyTorch chuẩn (Bản CPU để tránh nặng máy, nếu máy server có GPU NVIDIA thì đổi link URL index)
-RUN pip install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+# 1. Cài đặt PyTorch chuẩn CPU
+RUN pip install --no-cache-dir torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cpu
 
 # 2. Cài đặt các thư viện trong requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 3. Cài đặt thêm các thư viện ML/VectorDB bị thiếu trong requirements (Scikit-learn, ChromaDB, Sentence-Transformers)
+# 3. Cài đặt thêm các thư viện ML/VectorDB
 RUN pip install --no-cache-dir scikit-learn==1.4.1.post1 chromadb==0.4.24 sentence-transformers==2.5.1 pysqlite3-binary
 
-# Cài đặt trình duyệt cho Playwright (dùng cho luồng crawler)
+# 4. Cài đặt Apache Airflow chuẩn ràng buộc Constraints từ Apache
+RUN pip install --no-cache-dir "apache-airflow==2.8.1" --constraint "https://raw.githubusercontent.com/apache/airflow/constraints-2.8.1/constraints-3.10.txt" \
+    && pip install --no-cache-dir psycopg2-binary
+
+# 5. Cài đặt trình duyệt cho Playwright
 RUN playwright install --with-deps chromium
 
 # Copy toàn bộ mã nguồn vào thư mục /app trong container
 COPY . .
-
-# Lệnh mặc định khởi chạy Scheduler
-CMD ["python", "scheduler_service.py"]

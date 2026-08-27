@@ -37,7 +37,7 @@ print("\n[TEST MODE] Chạy thử nghiệm 1 lần duy nhất ngay khi vừa kh�
 trigger_pipeline()
 print("[TEST MODE] Đã chạy xong lượt test đầu tiên! Chuyển sang chế độ chờ lịch 00:00...\n")
 
-# Vòng lặp vô hạn chạy ngầm để ngồi canh đến 00:00
+# Vòng lặp vô hạn chạy ngầm để canh đến 00:00
 while True:
     schedule.run_pending()
     time.sleep(10)  # Check lịch mỗi 10s

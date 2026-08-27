@@ -1,4 +1,4 @@
-fastapi>=0.100.0
+fastAPI>=0.100.0
 uvicorn>=0.22.0
 pydantic>=2.0.0
 pydantic-settings>=2.0.0
@@ -12,3 +12,17 @@ python-docx
 chromadb==0.4.24
 pysqlite3-binary
 sentence-transformers
+
+# LangChain:
+langchain>=0.2.0
+langchain-core>=0.2.0
+langchain-community>=0.2.0
+langchain-google-genai>=1.0.0
+langchain-chroma>=0.1.0
+langchain-openai
+rank_bm25>=0.2.2
+
+# PostgreSQL Drivers (Cài đủ cả psycopg v3 và pool):
+psycopg[binary]>=3.1.18
+psycopg_pool>=3.2.0
+psycopg2-binary>=2.9.9

@@ -13,3 +13,4 @@ class PredictRequest(BaseModel):
 
 class ChatRequest(BaseModel):
     message: str = Field(..., description="Câu hỏi hoặc lời nhắn của người dùng", example="cho tôi biết giá bán của căn nhà ở Địa chỉ: Số 142 đường Lê Văn Việt, Tăng Nhơn Phú A, TP. Thủ Đức!")
+    session_id: Optional[str] = "default_session"

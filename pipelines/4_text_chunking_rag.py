@@ -123,10 +123,16 @@ def main():
         return
 
     chroma_host = os.environ.get("CHROMA_HOST", "localhost")
+    # lấy biến HROMA_HOST: khi ccos docker
+    # lấy biến localhost: khi chạy trực tiếp trên máy
     chroma_port = int(os.environ.get("CHROMA_PORT", 8001))
+    # lấy cổng HROMA_HOST: khi ccos docker
+    # lấy cổng 8001: khi chạy trực tiếp trên máy
     chroma_client = chromadb.HttpClient(host=chroma_host, port=chroma_port)
+    # khởi tạo kết nối client - Server qua giao thức HTTP thay vì trực tiếp ghi đè băng PersistentClient
     sentence_transformer_ef = embedding_functions.SentenceTransformerEmbeddingFunction(model_name="all-MiniLM-L6-v2")
     collection = chroma_client.get_or_create_collection(name="realestate_collection", embedding_function=sentence_transformer_ef)
+    # lấy hoặc tạo Collection
 
     documents = []
     metadatas = []
