@@ -22,20 +22,50 @@ const ChatbotPage = () => {
     }, [messages, isLoading]);
 
     const handleSendMessage = async (userText) => {
-        const newMessages = [...messages, { text: userText, isUser: true }];
-        setMessages(newMessages);
+        // 1. Thêm tin nhắn của User vào giao diện
+        setMessages((prev) => [...prev, { text: userText, isUser: true }]);
         setIsLoading(true);
-        try {
-            const botReply = await chatbotService.sendMessage(userText);
-            setMessages((prev) => [...prev, { text: botReply, isUser: false }]);
-        } catch (error) {
-            setMessages((prev) => [
-                ...prev,
-                { text: `Lỗi luồng dữ liệu: ${error.message}. Vui lòng thử lại sau.`, isUser: false }
-            ]);
-        } finally {
-            setIsLoading(false);
-        }
+
+        let botReplyAccumulator = "";
+        let isFirstToken = true;
+
+        // 2. Gọi hàm Streaming SSE
+        await chatbotService.sendMessageStream(
+            userText,
+            // onChunk: Mỗi khi nhận được 1 token mới
+            (token) => {
+                if (isFirstToken) {
+                    setIsLoading(false); // Tắt animation chờ ngay khi chữ đầu tiên xuất hiện!
+                    isFirstToken = false;
+                    // Tạo một khung tin nhắn mới cho Bot
+                    setMessages((prev) => [...prev, { text: token, isUser: false }]);
+                    botReplyAccumulator = token;
+                } else {
+                    botReplyAccumulator += token;
+                    // Cập nhật chữ rơi trực tiếp vào tin nhắn cuối cùng của Bot
+                    setMessages((prev) => {
+                        const updated = [...prev];
+                        updated[updated.length - 1] = {
+                            text: botReplyAccumulator,
+                            isUser: false
+                        };
+                        return updated;
+                    });
+                }
+            },
+            // onFinish: Khi Bot sinh xong toàn bộ câu
+            () => {
+                setIsLoading(false);
+            },
+            // onError: Nếu có lỗi kết nối
+            (error) => {
+                setIsLoading(false);
+                setMessages((prev) => [
+                    ...prev,
+                    { text: `Lỗi kết nối Streaming: ${error.message}`, isUser: false }
+                ]);
+            }
+        );
     };
 
     return (
@@ -46,7 +76,7 @@ const ChatbotPage = () => {
                     <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
                     <div>
                         <h2 className="font-bold text-sm text-[#0F172A]">AI tư vấn, đề xuất nhà & hỗ trợ chính sách</h2>
-                        <p className="text-[11px] text-slate-400">Hệ tri thức kết hợp định tuyến dữ liệu RAG thực tế</p>
+                        <p className="text-[11px] text-slate-400">Hệ tri thức kết hợp định tuyến dữ liệu RAG thời gian thực (SSE Streaming)</p>
                     </div>
                 </div>
             </div>

@@ -19,14 +19,14 @@ class ChatbotService:
     def __init__(self):
         # 1. Khởi tạo LLM Local qua Ollama
         self.llm = ChatOpenAI(
-            model=os.getenv("VLLM_MODEL_NAME", "Qwen/Qwen2.5-1.5B-Instruct-AWQ"),
+            model=os.getenv("VLLM_MODEL_NAME", "Qwen/Qwen2.5-3B-Instruct-AWQ"),
             base_url=os.getenv("VLLM_BASE_URL", "http://vllm:8000/v1"),
             api_key=os.getenv("VLLM_API_KEY", "none_required"),
-            temperature=0.4,
-            max_tokens=None,  # ◄ Ép None ở ngoài để LangChain KHÔNG tự inject max_completion_tokens
+            temperature=0.2,
+            max_tokens=None, 
             timeout=60,
-            extra_body={"max_tokens": 512,
-                "repetition_penalty": 1.15}  # ◄ Đưa max_tokens vào thẳng body gốc của vLLM
+            extra_body={"max_tokens": 256, # ◄ KHÓA CHẶT: Bot chỉ được nói tối đa 256 tokens!
+                "repetition_penalty": 1.15}  
         )
         # 2. Khởi tạo Embeddings & ChromaDB Client (Dense Retriever)
         self.embedding_function = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
@@ -47,6 +47,7 @@ class ChatbotService:
             "postgresql://postgres:postgres@postgres:5432/aura_realestate_db"
         )
         self.rag_chain = self._build_rag_chain()
+
 # ===========================================================================================
     def _build_bm25_retriever(self) -> BM25Retriever:
         """Lấy toàn bộ dữ liệu từ ChromaDB để lập chỉ mục BM25 Sparse Index"""
@@ -65,18 +66,46 @@ class ChatbotService:
             print(f"[Warning] Không thể khởi tạo BM25 Retriever: {e}")
         return None
 
-    def _retrieve_documents(self, user_message: str) -> str:
+    def _condense_query(self, user_message: str, chat_history: List, summary: str) -> str:
+        """Kỹ thuật Query Rewriting: Tự động tổng hợp History + Summary + Câu hỏi hiện tại
+        thành 1 câu tìm kiếm độc lập trước khi ném vào ChromaDB / BM25.
+        """
+        if not chat_history and (not summary or summary == "Chưa có thông tin ghi nhớ."):
+            return user_message
+
+        recent_context = "\n".join([f"{type(m).__name__}: {m.content}" for m in chat_history[-3:]])
+
+        rewrite_prompt = (
+            "Bạn là trợ lý phân tích ngữ cảnh bất động sản.\n"
+            "Nhiệm vụ: Dựa vào 'Hồ sơ khách hàng' và 'Lịch sử hội thoại', hãy viết lại 'Câu hỏi mới nhất' "
+            "thành MỘT CÂU TÌM KIẾM ĐỘC LẬP đầy đủ thông tin (Quận/Vị trí, Khoảng giá, Loại nhà) để tra cứu dữ liệu.\n"
+            "- Nếu câu hỏi là câu tiếp nối (ví dụ: '15 tỷ thì sao', 'tôi đang tìm gì', 'còn căn nào khác không'): Bắt buộc bổ sung thông tin vị trí/tầm giá từ lịch sử vào câu tìm kiếm.\n"
+            "- Nếu câu hỏi là chào hỏi xã giao (ví dụ: 'hi', 'chào bạn'): Giữ nguyên câu hỏi gốc.\n"
+            "TUYỆT ĐỐI chỉ trả về câu tìm kiếm ngắn gọn, không giải thích gì thêm.\n\n"
+            f"Hồ sơ khách hàng: {summary}\n"
+            f"Lịch sử hội thoại:\n{recent_context}\n\n"
+            f"Câu hỏi mới nhất: {user_message}\n\n"
+            f"Câu tìm kiếm viết lại:"
+        )
+        try:
+            standalone_query = self.llm.invoke(rewrite_prompt).content.strip()
+            print(f"[Query Rewriting] '{user_message}' ➔ '{standalone_query}'")
+            return standalone_query if standalone_query else user_message
+        except Exception:
+            return user_message
+
+    def _retrieve_documents(self, search_query: str) -> str:
         """Truy xuất tài liệu qua Hybrid Search (Dense + Sparse)"""
         total_in_db = self.vector_store._collection.count()
 
         # Nhánh 1: Dense Search (Vector)
-        dense_docs = self.vector_store.similarity_search(user_message, k=5)
+        dense_docs = self.vector_store.similarity_search(search_query, k=5)
 
         # Nhánh 2: Sparse Search (BM25)
         sparse_docs = []
         if self.sparse_retriever:
             try:
-                sparse_docs = self.sparse_retriever.invoke(user_message)
+                sparse_docs = self.sparse_retriever.invoke(search_query)
             except Exception:
                 sparse_docs = []
 
@@ -87,13 +116,10 @@ class ChatbotService:
             docs = dense_docs
 
         if not docs:
-            return (
-                f"HỆ THỐNG PHÁT HIỆN: KHÔNG CÓ BẤT ĐỘNG SẢN NÀO TRONG KHO THỎA MÃN ĐÚNG TIÊU CHÍ KHÁCH HỎI.\n"
-                f"Thông tin kho: Tổng kho hiện quản lý {total_in_db} chunks."
-            )
+            return "HỆ THỐNG: Hiện chưa có bất động sản nào trong kho phù hợp với tiêu chí trên."
 
         formatted_docs = []
-        # Lấy Top 3 kết quả xuất sắc nhất sau RRF
+        # Lấy Top 2 kết quả xuất sắc nhất sau RRF
         for d in docs[:2]:
             meta = d.metadata
             info_block = (
@@ -137,7 +163,7 @@ class ChatbotService:
 
 # =========================================================================================
     def get_recent_history(self, session_id: str) -> List:
-        """CHỈ lấy tối đa 4 tin nhắn thật gần nhất, không chứa summary"""
+        """CHỈ lấy 2 tin nhắn gần nhất (1 Human + 1 AI), phần thông tin dài đã có trong summary"""
         messages = []
         with psycopg.connect(self.db_url) as conn:
             with conn.cursor() as cur:
@@ -246,18 +272,18 @@ class ChatbotService:
 # =========================================================================================
     def _build_rag_chain(self):
         system_instruction = (
-            "Bạn là chuyên viên tư vấn bất động sản Aura Realestate tại TP.HCM.\n\n"
-            "GHI CHÚ HỒ SƠ KHÁCH HÀNG (BỘ NHỚ NGẦM NỘI BỘ, KHÔNG TỰ Ý ĐỌC RA):\n"
+            "Bạn là chuyên viên tư vấn bất động sản Aura Realestate tại TP.HCM. BẮT BUỘC phản hồi 100% bằng TIẾNG VIỆT tự nhiên, TUYỆT ĐỐI CẤM sử dụng chữ Hán/tiếng Trung hay tiếng nước ngoài.\n\n"
+            "GHI CHÚ HỒ SƠ KHÁCH HÀNG:\n"
             "{summary}\n\n"
             "DỮ LIỆU NHÀ ĐẤT TRONG HỆ THỐNG:\n"
             "{context}\n\n"
-            "QUY TẮC PHẢN HỒI:\n"
-            "1. Nếu khách chỉ chào hỏi xã giao (ví dụ: 'hi', 'chào em', 'hello'): Chỉ chào lại lịch sự và hỏi nhu cầu. TUYỆT ĐỐI KHÔNG tự ý đọc lại hay liệt kê các thông số trong GHI CHÚ HỒ SƠ.\n"
-            "2. Khi khách hỏi tìm nhà: Sử dụng thông tin trong GHI CHÚ HỒ SƠ kết hợp với DỮ LIỆU NHÀ ĐẤT để tư vấn căn phù hợp.\n"
-            "3. Nếu có nhà phù hợp trong dữ liệu: Báo ngay giá, diện tích, kết cấu và ưu điểm cho khách.\n"
-            "4. Nếu không có nhà đúng tiêu chí: Thông báo lịch sự hiện kho chưa có căn đúng 100% yêu cầu, và gợi ý khu vực lân cận hoặc tầm giá tương đương.\n"
-            "5. TUYỆT ĐỐI KHÔNG lặp lại câu hỏi xin thêm thông tin nếu khách đã nói 'sao cũng được' hoặc đã nêu ngân sách.\n"
-            "6. Câu trả lời cần ngắn gọn, tự nhiên, xưng hô lịch sự (gọi tên khách nếu đã biết)."
+            "QUY TẮC PHẢN HỒI (THEO THỨ TỰ ƯU TIÊN):\n"
+            "1. NẾU KHÁCH HỎI VỀ NHU CẦU / THÔNG TIN ĐÃ NÓI (ví dụ: 'tôi đang tìm gì', 'bạn nhớ tôi tìm gì không', 'tôi tên gì'): BẮT BUỘC đọc thông tin từ GHI CHÚ HỒ SƠ KHÁCH HÀNG và lịch sử để trả lời rõ ràng rằng khách đang tìm nhà ở khu vực nào, tầm giá nào.\n"
+            "2. NẾU KHÁCH CHỈ CHÀO HỎI XÃ GIAO (ví dụ: 'hi', 'hello', 'chào bạn'): Chào lại ngắn gọn và hỏi khách cần tìm nhà ở khu vực nào.\n"
+            "3. KHI KHÁCH HỎI TÌM NHÀ:\n"
+            "   - Nếu có nhà phù hợp trong DỮ LIỆU: Báo ngay giá, diện tích, kết cấu và ưu điểm cho khách.\n"
+            "   - Nếu không có nhà đúng tiêu chí: Thông báo lịch sự hiện kho chưa có căn đúng 100% yêu cầu, và gợi ý khu vực lân cận hoặc tầm giá tương đương.\n"
+            "4. Câu trả lời cần tự nhiên, xưng hô lịch sự, ngắn gọn và trọng tâm."
         )
 
         prompt_template = ChatPromptTemplate.from_messages([
@@ -271,35 +297,21 @@ class ChatbotService:
     def ask_rag_bot(self, user_message: str, session_id: str = "default_session") -> str:
         """Lấy ngữ cảnh RAG + Memory nén và sinh phản hồi"""
         try:
-            # 1. Lấy context và memory lịch sử TRƯỚC (chưa chứa user_message hiện tại)
-            context = self._retrieve_documents(user_message)
+            # 1. Lấy lịch sử gần nhất và hồ sơ tóm tắt từ database
             chat_history = self.get_recent_history(session_id)
             summary = self.get_summary_text(session_id)
 
-            # 2. Sau đó mới lưu câu hỏi hiện tại vào DB
-            self.save_message(session_id, "human", user_message)
+            # 2. Viết lại câu query thông minh (kết hợp History + Request + Summary)
+            standalone_search_query = self._condense_query(
+                user_message=user_message,
+                chat_history=chat_history,
+                summary=summary
+            )
 
-            # ================= [IN CHI TIẾT SỐ TOKEN TỪNG PHẦN] =================
-            # 1. Token của câu hỏi hiện tại
-            token_user_msg = self.llm.get_num_tokens(user_message)
-            
-            # 2. Token của dữ liệu RAG (ChromaDB + BM25)
-            token_rag = self.llm.get_num_tokens(context)
-            
-            # 3. Token của Chat History + Summary
-            history_text = "\n".join([f"{type(m).__name__}: {m.content}" for m in chat_history])
-            token_history = self.llm.get_num_tokens(history_text)
-            
-            # 4. In trực tiếp ra màn hình log
-            print("\n" + "="*50)
-            print("📊 PHÂN TÍCH TOKEN CỦA REQUEST:")
-            print(f"1. Tin nhắn người dùng ('{user_message}'): {token_user_msg} tokens")
-            print(f"2. Chat History + Summary ({len(chat_history)} messages): {token_history} tokens")
-            print(f"3. Dữ liệu RAG Context: {token_rag} tokens")
-            print(f"👉 Tổng ước tính từ 3 nguồn: {token_user_msg + token_history + token_rag} tokens (Chưa tính System Prompt)")
-            print("="*50 + "\n")
-            # =====================================================================
+            # 3. Dùng câu query đã viết lại để truy xuất tài liệu trong RAG
+            context = self._retrieve_documents(standalone_search_query)
 
+            # 4. Gửi vào LLM sinh câu trả lời
             response = self.rag_chain.invoke({
                 "summary": summary,
                 "context": context,
@@ -307,14 +319,38 @@ class ChatbotService:
                 "user_message": user_message
             })
 
-            # 2. Lưu câu trả lời của bot
-            self.save_message(session_id, "ai", response)
-
-            # 3. Kích hoạt nén memory
-            self.compress_memory_if_needed(session_id)
-
             return response
         except Exception as e:
             return f"Lỗi xử lý hệ thống RAG: {str(e)}"
-            
+
+    async def astream_rag_bot(self, user_message: str, session_id: str = "default_session"):
+        """Luồng sinh câu trả lời Streaming bất đồng bộ (Yield từng token qua SSE)"""
+        try:
+            # 1. Lấy lịch sử và hồ sơ tóm tắt từ database
+            chat_history = self.get_recent_history(session_id)
+            summary = self.get_summary_text(session_id)
+
+            # 2. Viết lại câu query thông minh
+            standalone_search_query = self._condense_query(
+                user_message=user_message,
+                chat_history=chat_history,
+                summary=summary
+            )
+
+            # 3. Truy xuất tài liệu RAG
+            context = self._retrieve_documents(standalone_search_query)
+
+            # 4. Stream từng token từ vLLM qua LangChain astream
+            async for chunk in self.rag_chain.astream({
+                "summary": summary,
+                "context": context,
+                "chat_history": chat_history,
+                "user_message": user_message
+            }):
+                if chunk:
+                    yield chunk
+
+        except Exception as e:
+            yield f"\n[Lỗi hệ thống Streaming: {str(e)}]"
+                   
 chatbot_service = ChatbotService()

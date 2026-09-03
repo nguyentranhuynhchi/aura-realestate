@@ -13,7 +13,12 @@ app = FastAPI(
 # Cấu hình CORS để Frontend (ví dụ chạy ở port 3000) có thể gọi API mà không bị chặn bảo mật
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Trong thực tế deploy nên giới hạn domain cụ thể thay vì "*"
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost",
+        "http://127.0.0.1"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
