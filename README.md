@@ -120,7 +120,7 @@ Trang rao vặt được bảo vệ chặt bởi Cloudflare/anti-bot, dự án t
 | # | Hướng tiếp cận | Công cụ | Kết quả | Vấn đề |
 | :-: | :--- | :--- | :---: | :--- |
 | 1 | Requests + BeautifulSoup | HTTP GET thô, parse HTML tĩnh | ❌ Thất bại | Nhẹ, nhanh nhất, nhưng trang React/Vue render bằng JS chỉ trả về trang trắng; dễ dính `403 Forbidden` |
-| 2 | Selenium + `undetected-chromedriver` + `selenium-stealth` | Giả lập Chrome thật | ❌ Thất bại | Vượt được JS-rendering, nhưng quá nặng RAM/CPU vì cõng cả trình duyệt thật, không khả thi ở quy mô lớn/chạy hàng ngày |
+| 2 | Selenium + `undetected-chromedriver` + `selenium-stealth` | Giả lập Chrome thật | ❌ Thất bại | Vượt được JS-rendering, nhưng quá nặng RAM/CPU vì trình duyệt thật, không khả thi ở quy mô lớn/chạy hàng ngày |
 | 3 | Cookie Harvesting + TLS Impersonation + BeautifulSoup | Playwright + `curl_cffi` + BeautifulSoup | ✅ **Thành công — dùng production** | Nhanh, nhẹ, vượt anti-bot ổn định, phù hợp chạy cron hàng ngày |
 
 Pipeline 3 bước của hướng thành công:
