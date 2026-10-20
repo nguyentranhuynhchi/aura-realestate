@@ -29,3 +29,12 @@ tempCodeRunnerFile.python
 .next/
 dist/
 node_modules/
+
+# Tài liệu học tập cá nhân & File riêng tư (CV & Kiến thức)
+kienthuc/
+*.docx
+*CV*
+~$*
+test_math.docx
+test_out.docx
+agent_backup_*/

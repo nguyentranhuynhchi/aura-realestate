@@ -1,0 +1,15 @@
+# Framework Multi-Agent & Đồ thị trạng thái
+langgraph>=0.2.0
+langchain-core>=0.3.0
+langchain-openai>=0.2.0
+pydantic>=2.0.0
+
+# Giao tiếp mạng & Cấu hình môi trường
+httpx>=0.25.0
+python-dotenv>=1.0.0
+
+# Kiểm thử & Đánh giá chất lượng
+pytest>=7.0.0
+
+# Biên soạn báo cáo thẩm định PDF chuyên nghiệp
+reportlab>=4.0.0

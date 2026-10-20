@@ -71,6 +71,7 @@ def scrape_v3(start_page, end_page):
     }
 
     sample_count = 0
+    max_crawl_limit = int(os.getenv("CRAWL_MAX_LIMIT", "10"))
 
     with open(OUTPUT_CSV, mode='a', encoding='utf-8-sig', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=FIELDNAMES)
@@ -163,8 +164,17 @@ def scrape_v3(start_page, end_page):
                         sample_count += 1
                         print(f"Đã ghi trực tiếp căn nhà số {sample_count} (ID: {house_data['id']})")
 
+                        # CHỐT CHẶN AN TOÀN: Cào đủ số lượng thì dừng ngay!
+                        if sample_count >= max_crawl_limit:
+                            print(f"\n[RATE LIMIT] Đã chạm mốc {max_crawl_limit} tin theo .env! Dừng cào an toàn.")
+                            break
+
                     except Exception: continue
                     time.sleep(random.uniform(2.5, 3.8))
+
+                # Thoát vòng lặp trang nếu đã đủ số lượng
+                if sample_count >= max_crawl_limit:
+                    break
 
             except Exception as e:
                 print(f"Lỗi kết nối trang tổng {page}: {e}")

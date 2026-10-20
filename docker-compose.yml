@@ -76,6 +76,9 @@ services:
       - AIRFLOW__SMTP__SMTP_PASSWORD=${AIRFLOW_SMTP_PASSWORD}
       - AIRFLOW__SMTP__SMTP_PORT=587
       - AIRFLOW__SMTP__SMTP_MAIL_FROM=${AIRFLOW_SMTP_MAIL_FROM}
+      - PIPELINE_RUN_HOUR=${PIPELINE_RUN_HOUR:-none}
+      - CRAWL_MAX_LIMIT=${CRAWL_MAX_LIMIT:-50}
+      - AIRFLOW__API__AUTH_BACKENDS=airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session
     volumes:
       - ./dags:/opt/airflow/dags
       - ./pipelines:/app/pipelines
@@ -84,6 +87,7 @@ services:
       - ./backend/models:/app/backend/models
       - ./model_registry:/app/model_registry
       - ./pipeline_log.json:/app/pipeline_log.json
+      - ./agent:/app/agent
     depends_on:
       - postgres
       - chromadb
@@ -124,7 +128,7 @@ services:
       --model Qwen/Qwen2.5-3B-Instruct-AWQ
       --quantization awq_marlin
       --dtype half
-      --max-model-len 2048 
+      --max-model-len 8192 
       --gpu-memory-utilization 0.90
       --swap-space 2
       --enforce-eager
@@ -163,3 +167,33 @@ services:
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_USERS_ALLOW_SIGN_UP=false
+
+# 10. MULTI-AGENT MLOPS SERVICE
+  agent-service:
+    build:
+      context: .
+      dockerfile: agent/Dockerfile
+    container_name: aura_agent_service
+    restart: unless-stopped
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
+      - PIPELINE_RUN_TIME=${PIPELINE_RUN_TIME:-none}
+      - VLLM_BASE_URL=http://vllm:8000/v1
+      - VLLM_MODEL_NAME=Qwen/Qwen2.5-3B-Instruct-AWQ
+      - AIRFLOW_API_URL=http://airflow-webserver:8080/api/v1
+      - AIRFLOW_USERNAME=admin
+      - AIRFLOW_PASSWORD=admin
+      # --- CẤU HÌNH GỬI EMAIL THÔNG BÁO & DUYỆT CODE (DÙNG CHUNG VỚI AIRFLOW) ---
+      - SMTP_HOST=smtp.gmail.com
+      - SMTP_PORT=587
+      - SMTP_USER=${AIRFLOW_SMTP_USER}
+      - SMTP_PASSWORD=${AIRFLOW_SMTP_PASSWORD}
+      - ALERT_RECIPIENT=nguyentranhuynhchi@gmail.com
+    volumes:
+      - ./agent:/app/agent
+      - ./pipelines:/app/pipelines:ro   # :ro = Read-Only (Khóa cứng code gốc an toàn)
+      - ./data:/app/data
+      - ./model_registry:/app/model_registry
+    depends_on:
+      - vllm
+      - airflow-webserver
