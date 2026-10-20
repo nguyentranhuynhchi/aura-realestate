@@ -61,7 +61,12 @@ def run_native_workflow(initial_state: AgentState, max_steps: int = 15) -> Agent
             elif current_node == "coder":
                 next_step = "validator"
             elif current_node == "validator":
-                next_step = "airflow_runner" if updates.get("validation_status") == "passed" else "coder"
+                if updates.get("validation_status") == "passed":
+                    next_step = "airflow_runner"
+                elif current_state.get("iteration_count", 0) >= current_state.get("max_iterations", 3):
+                    next_step = "human_gate"
+                else:
+                    next_step = "coder"
             elif current_node == "human_gate":
                 next_step = "__end__"
             else:
@@ -105,14 +110,19 @@ def create_aura_workflow_graph():
         workflow.add_edge("coder", "validator")
 
         def validator_router(state: AgentState):
-            return "airflow_runner" if state.get("validation_status") == "passed" else "coder"
+            if state.get("validation_status") == "passed":
+                return "airflow_runner"
+            if state.get("iteration_count", 0) >= state.get("max_iterations", 3):
+                return "human_gate"
+            return "coder"
 
         workflow.add_conditional_edges(
             "validator",
             validator_router,
             {
                 "airflow_runner": "airflow_runner",
-                "coder": "coder"
+                "coder": "coder",
+                "human_gate": "human_gate"
             }
         )
 

@@ -67,20 +67,38 @@ def human_gate_node(state: AgentState) -> Dict[str, Any]:
         print(f" [HUMAN GATE CẢNH BÁO]: Không thể tạo file PDF ({e}), tiếp tục tiến trình...")
         pdf_path = None
 
-    # 4. GỬI EMAIL THÔNG BÁO CHO QUẢN TRỊ VIÊN
+    # 4. GỬI EMAIL THÔNG BÁO CHO QUẢN TRỊ VIÊN (CÓ CHỐNG SPAM RATE-LIMIT)
     status_label = "SUCCESS" if approved else "ACTION_REQUIRED"
     subject = f"Aura MLOps - Báo cáo vận hành: {status_label}"
-    try:
-        send_email_alert.invoke({
-            "subject": subject,
-            "diagnosis": last_msg,
-            "diff_code": state.get("diff", ""),
-            "status": status_label,
-            "pdf_path": pdf_path
-        })
-        print(" [HUMAN GATE] Đã gửi báo cáo tổng hợp thành công về Email người quản trị!")
-    except Exception as e:
-        print(f" [HUMAN GATE]: Bỏ qua gửi email ({e})")
+    
+    last_email_file = os.path.join(tempfile.gettempdir(), "aura_mlops_last_email.timestamp")
+    should_send = True
+
+    # Chống spam: Không gửi email SUCCESS trùng lặp trong vòng 3 phút (180 giây)
+    if os.path.exists(last_email_file) and status_label == "SUCCESS":
+        try:
+            with open(last_email_file, "r") as f:
+                last_time = float(f.read().strip())
+                if time.time() - last_time < 180:
+                    print(" [HUMAN GATE]: Bỏ qua gửi email do vừa gửi trong vòng 3 phút (Chống Spam).")
+                    should_send = False
+        except Exception:
+            pass
+
+    if should_send:
+        try:
+            send_email_alert.invoke({
+                "subject": subject,
+                "diagnosis": last_msg,
+                "diff_code": state.get("diff", ""),
+                "status": status_label,
+                "pdf_path": pdf_path
+            })
+            print(" [HUMAN GATE] Đã gửi báo cáo tổng hợp thành công về Email người quản trị!")
+            with open(last_email_file, "w") as f:
+                f.write(str(time.time()))
+        except Exception as e:
+            print(f" [HUMAN GATE]: Bỏ qua gửi email ({e})")
 
     return {
         "human_approved": approved,

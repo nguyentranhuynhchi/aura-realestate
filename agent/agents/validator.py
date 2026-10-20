@@ -29,18 +29,20 @@ def validator_node(state: AgentState) -> Dict[str, Any]:
     """Node xử lý của Validator Agent."""
     target_file = state.get("target_file", "")
     iteration = state.get("iteration_count", 1)
+    max_iter = state.get("max_iterations", 3)
     val_status = state.get("validation_status", "pending")
     val_error = state.get("validation_error")
 
-    print(f"\n [VALIDATOR] Đang thẩm định tính toàn vẹn của Sandbox sau khi vá '{target_file}'...")
+    print(f"\n [VALIDATOR] Đang thẩm định tính toàn vẹn của Sandbox sau khi vá '{target_file}' (Lần thử {iteration}/{max_iter})...")
 
     # 1. NẾU CODER ĐÃ BÁO LỖI TỪ TRƯỚC (VÍ DỤ SAI CÚ PHÁP AST)
     if val_status == "failed" and val_error:
         print(f" [VALIDATOR]: Từ chối thẩm định do lỗi có sẵn từ Coder: {val_error}")
+        next_step = "human_gate" if iteration >= max_iter else "coder"
         return {
             "validation_status": "failed",
             "validation_error": val_error,
-            "next_step": "coder"
+            "next_step": next_step
         }
 
     # 2. KIỂM THỬ TẦNG 1: THỬ NẠP MODULE TRONG SUBPROCESS CÔ LẬP
@@ -54,11 +56,12 @@ def validator_node(state: AgentState) -> Dict[str, Any]:
             # Cập nhật kết quả test vào metrics
             metrics_collector.log_iteration(iteration, target_file, syntax_valid=True, test_passed=False)
             
+            next_step = "human_gate" if iteration >= max_iter else "coder"
             return {
                 "validation_status": "failed",
                 "validation_error": err_msg,
                 "error_logs": err_msg,
-                "next_step": "coder"
+                "next_step": next_step
             }
         print(" [VALIDATOR TẦNG 1]: Nạp module thành công tuyệt đối!")
 
@@ -70,11 +73,12 @@ def validator_node(state: AgentState) -> Dict[str, Any]:
             err_msg = f"Lỗi Smoke Test tiền xử lý:\n{smoke_res.get('error')}"
             print(f" [VALIDATOR PHÁT HIỆN LỖI]: {err_msg}")
             metrics_collector.log_iteration(iteration, target_file, syntax_valid=True, test_passed=False)
+            next_step = "human_gate" if iteration >= max_iter else "coder"
             return {
                 "validation_status": "failed",
                 "validation_error": err_msg,
                 "error_logs": err_msg,
-                "next_step": "coder"
+                "next_step": next_step
             }
         print(" [VALIDATOR TẦNG 2]: Smoke Test tiền xử lý vượt qua 100%!")
 

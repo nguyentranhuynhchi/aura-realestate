@@ -17,7 +17,7 @@ def tune_ridge(X_train: np.ndarray, y_train: np.ndarray, X_val: np.ndarray, y_va
             best_alpha = a
             best_model = m
             
-    meta = {"best_alpha": best_alpha, "val_r2": round(float(best_r2), 4), "model_type": "Ridge"}
+    meta = {"best_alpha": best_alpha, "val_r2": round(best_r2, 4), "model_type": "Ridge"}
     return best_model, meta
 
 if __name__ == "__main__":
@@ -25,7 +25,3 @@ if __name__ == "__main__":
     y = np.random.randn(50)
     m, meta = tune_ridge(X, y, X, y)
     print("Ridge tuning:", meta)
-
-# Optimized alpha for Ridge
-# Optimized alpha for Ridge
-# Optimized alpha for Ridge

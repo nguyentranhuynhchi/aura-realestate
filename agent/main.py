@@ -3,8 +3,9 @@
 AURA MLOPS MULTI-AGENT MAIN RUNNER (MVP ARCHITECTURE)
 ==============================================================================
 Điểm khởi động chính của Hệ thống Multi-Agent MLOps Tự hành:
-- Chế độ 1: '--mode once' -> Chạy một phiên thẩm định / vá lỗi MLOps duy nhất.
-- Chế độ 2: '--mode daemon' -> Tiến trình giám sát ngầm theo chu kỳ.
+- Chế độ 1: '--mode once' -> Chạy 1 lần duy nhất theo yêu cầu thủ công.
+- Chế độ 2: '--mode daemon' / 'auto' -> Lắng nghe lịch hẹn giờ PIPELINE_RUN_TIME
+  (Tránh tình trạng container bị restart liên tục gây spam email).
 """
 
 import os
@@ -104,9 +105,9 @@ def main():
     parser = argparse.ArgumentParser(description="Aura Real Estate Multi-Agent MLOps Runner")
     parser.add_argument(
         "--mode",
-        choices=["once", "daemon"],
-        default="once",
-        help="Chế độ chạy: 'once' (chạy 1 lần) hoặc 'daemon' (chạy tiến trình nền giám sát liên tục)"
+        choices=["once", "daemon", "auto"],
+        default="auto",
+        help="Chế độ chạy: 'once' (chạy 1 lần), 'daemon' (theo chu kỳ) hoặc 'auto' (tự động lắng nghe PIPELINE_RUN_TIME)"
     )
     parser.add_argument(
         "--interval",
@@ -116,25 +117,55 @@ def main():
     )
     args = parser.parse_args()
 
+    pipeline_run_time = os.getenv("PIPELINE_RUN_TIME", "none").strip()
+
+    # 1. Chạy thủ công 1 lần duy nhất
     if args.mode == "once":
         session_id = f"mlops_manual_{int(time.time())}"
         run_agent_workflow(session_id=session_id)
-    elif args.mode == "daemon":
-        logger.info(f"Khởi động Multi-Agent Daemon Worker (Chu kỳ kiểm tra: {args.interval}s)...")
-        while IS_RUNNING:
-            session_id = f"mlops_daemon_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-            try:
-                run_agent_workflow(session_id=session_id)
-            except Exception as e:
-                logger.error(f"Lỗi phiên daemon: {e}")
+        return
 
-            logger.info(f"Nghỉ {args.interval} giây trước chu kỳ giám sát kế tiếp...")
-            for _ in range(args.interval):
-                if not IS_RUNNING:
-                    break
-                time.sleep(1)
+    # 2. Chế độ lắng nghe lịch hẹn hoặc chạy ngầm (Container Docker mode)
+    logger.info("==================================================")
+    logger.info(" KHỞI ĐỘNG MULTI-AGENT DAEMON WORKER (GIÁM SÁT NGẦM)")
+    logger.info(f" Lịch hẹn PIPELINE_RUN_TIME: {pipeline_run_time}")
+    logger.info("==================================================")
 
-        logger.info("Multi-Agent Daemon Worker đã dừng an toàn.")
+    last_triggered_date = ""
+
+    while IS_RUNNING:
+        now_dt = datetime.now()
+        current_time_str = now_dt.strftime("%H:%M")
+        current_date_str = now_dt.strftime("%Y-%m-%d")
+
+        if pipeline_run_time not in ("none", "", "False", "false"):
+            # Kiểm tra nếu khớp giờ hẹn trong ngày hôm nay
+            if current_time_str == pipeline_run_time and last_triggered_date != current_date_str:
+                logger.info(f"⏰ ĐÃ TỚI GIỜ HẸN ({pipeline_run_time})! Đang kích hoạt chu trình MLOps...")
+                session_id = f"mlops_scheduled_{now_dt.strftime('%Y%m%d_%H%M%S')}"
+                try:
+                    run_agent_workflow(session_id=session_id)
+                    last_triggered_date = current_date_str
+                except Exception as e:
+                    logger.error(f"Lỗi phiên chạy hẹn giờ: {e}")
+            # Ngủ 15 giây rồi kiểm tra lại đồng hồ
+        else:
+            if args.mode == "daemon":
+                session_id = f"mlops_daemon_{now_dt.strftime('%Y%m%d_%H%M%S')}"
+                try:
+                    run_agent_workflow(session_id=session_id)
+                except Exception as e:
+                    logger.error(f"Lỗi phiên daemon: {e}")
+                time.sleep(args.interval)
+                continue
+
+        # Nghỉ an toàn 15 giây trước lần kiểm tra kế tiếp
+        for _ in range(15):
+            if not IS_RUNNING:
+                break
+            time.sleep(1)
+
+    logger.info("Multi-Agent Daemon Worker đã dừng an toàn.")
 
 
 if __name__ == "__main__":

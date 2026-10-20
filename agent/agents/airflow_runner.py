@@ -35,18 +35,20 @@ def airflow_runner_node(state: AgentState) -> Dict[str, Any]:
     print("\n [AIRFLOW RUNNER] Đang chuẩn bị kích hoạt pipeline MLOps...")
 
     # 1. THỬ KÍCH HOẠT DAG TRÊN AIRFLOW WEBSERVER
-    trigger_res = trigger_airflow_dag(dag_id="aura_mlops_dag")
+    dag_id = os.getenv("AIRFLOW_DAG_ID", "aura_realestate_mlops_pipeline")
+    trigger_res = trigger_airflow_dag(dag_id=dag_id)
 
     if trigger_res.get("success"):
         dag_run_id = trigger_res.get("dag_run_id")
-        print(f" [AIRFLOW RUNNER] Kích hoạt thành công Airflow DAG Run: {dag_run_id}")
+        active_dag_id = trigger_res.get("dag_id", dag_id)
+        print(f" [AIRFLOW RUNNER] Kích hoạt thành công Airflow DAG Run: {dag_run_id} (DAG: {active_dag_id})")
         
         # Kiểm tra trạng thái DAG
-        status_res = get_dag_run_status(dag_id="aura_mlops_dag", dag_run_id=dag_run_id)
+        status_res = get_dag_run_status(dag_id=active_dag_id, dag_run_id=dag_run_id)
         current_state = status_res.get("state", "running")
         
         if current_state == "failed":
-            logs_res = get_failed_task_logs(dag_id="aura_mlops_dag", dag_run_id=dag_run_id)
+            logs_res = get_failed_task_logs(dag_id=active_dag_id, dag_run_id=dag_run_id)
             return {
                 "dag_run_id": dag_run_id,
                 "dag_status": "failed",

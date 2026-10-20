@@ -39,20 +39,38 @@ def _get_auth_headers() -> Dict[str, str]:
     }
 
 
-def trigger_airflow_dag(dag_id: str = "aura_mlops_dag") -> Dict[str, Any]:
+DEFAULT_DAG_ID = os.getenv("AIRFLOW_DAG_ID", "aura_realestate_mlops_pipeline")
+
+
+def trigger_airflow_dag(dag_id: str = DEFAULT_DAG_ID) -> Dict[str, Any]:
     """Kích hoạt một phiên chạy DAG (DAG Run) trên Airflow."""
     url = f"{AIRFLOW_BASE_URL}/dags/{dag_id}/dagRuns"
     try:
-        with httpx.Client(timeout=5.0) as client:
+        with httpx.Client(timeout=25.0) as client:
             resp = client.post(url, json={}, headers=_get_auth_headers())
             if resp.status_code in (200, 201):
                 data = resp.json()
                 return {
                     "success": True,
+                    "dag_id": dag_id,
                     "dag_run_id": data.get("dag_run_id"),
                     "state": data.get("state", "queued"),
                     "execution_date": data.get("execution_date")
                 }
+            # Tự động thử tên DAG thay thế nếu gặp 404
+            if resp.status_code == 404:
+                alt_id = "aura_mlops_dag" if dag_id != "aura_mlops_dag" else "aura_realestate_mlops_pipeline"
+                alt_url = f"{AIRFLOW_BASE_URL}/dags/{alt_id}/dagRuns"
+                alt_resp = client.post(alt_url, json={}, headers=_get_auth_headers())
+                if alt_resp.status_code in (200, 201):
+                    alt_data = alt_resp.json()
+                    return {
+                        "success": True,
+                        "dag_id": alt_id,
+                        "dag_run_id": alt_data.get("dag_run_id"),
+                        "state": alt_data.get("state", "queued"),
+                        "execution_date": alt_data.get("execution_date")
+                    }
             return {
                 "success": False,
                 "error": f"Airflow API trả về HTTP {resp.status_code}: {resp.text}"
@@ -68,7 +86,7 @@ def get_dag_run_status(dag_id: str, dag_run_id: str) -> Dict[str, Any]:
     """Kiểm tra trạng thái của một DAG Run ('running', 'success', 'failed')."""
     url = f"{AIRFLOW_BASE_URL}/dags/{dag_id}/dagRuns/{dag_run_id}"
     try:
-        with httpx.Client(timeout=5.0) as client:
+        with httpx.Client(timeout=25.0) as client:
             resp = client.get(url, headers=_get_auth_headers())
             if resp.status_code == 200:
                 data = resp.json()
@@ -94,7 +112,7 @@ def get_failed_task_logs(dag_id: str, dag_run_id: str) -> Dict[str, Any]:
     """Trích xuất nhật ký lỗi (Task Logs) từ tác vụ thất bại trong phiên chạy."""
     url = f"{AIRFLOW_BASE_URL}/dags/{dag_id}/dagRuns/{dag_run_id}/taskInstances"
     try:
-        with httpx.Client(timeout=5.0) as client:
+        with httpx.Client(timeout=25.0) as client:
             resp = client.get(url, headers=_get_auth_headers())
             if resp.status_code != 200:
                 return {"success": False, "error": f"HTTP {resp.status_code}: {resp.text}"}
