@@ -175,6 +175,9 @@ services:
       dockerfile: agent/Dockerfile
     container_name: aura_agent_service
     restart: unless-stopped
+    command: sh -c "langgraph dev --host 0.0.0.0 --port 2024 & python -m agent.main"
+    ports:
+      - "2024:2024"
     environment:
       - TZ=Asia/Ho_Chi_Minh
       - PIPELINE_RUN_TIME=${PIPELINE_RUN_TIME:-none}

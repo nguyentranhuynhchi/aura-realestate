@@ -24,7 +24,7 @@ if sys.platform == "win32":
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 
 # Cấu hình Airflow mặc định
-AIRFLOW_BASE_URL = os.getenv("AIRFLOW_BASE_URL", "http://localhost:8080/api/v1")
+AIRFLOW_BASE_URL = os.getenv("AIRFLOW_BASE_URL") or os.getenv("AIRFLOW_API_URL") or "http://airflow-webserver:8080/api/v1"
 AIRFLOW_USERNAME = os.getenv("AIRFLOW_USERNAME", "admin")
 AIRFLOW_PASSWORD = os.getenv("AIRFLOW_PASSWORD", "admin")
 
@@ -43,11 +43,12 @@ DEFAULT_DAG_ID = os.getenv("AIRFLOW_DAG_ID", "aura_realestate_mlops_pipeline")
 
 
 def trigger_airflow_dag(dag_id: str = DEFAULT_DAG_ID) -> Dict[str, Any]:
-    """Kích hoạt một phiên chạy DAG (DAG Run) trên Airflow."""
+    """Kích hoạt một phiên chạy DAG (DAG Run) trên Airflow, luôn trỏ vào update_code để bảo vệ baseline."""
     url = f"{AIRFLOW_BASE_URL}/dags/{dag_id}/dagRuns"
+    payload = {"conf": {"pipeline_dir": "/app/agent/sandbox/update_code"}}
     try:
         with httpx.Client(timeout=25.0) as client:
-            resp = client.post(url, json={}, headers=_get_auth_headers())
+            resp = client.post(url, json=payload, headers=_get_auth_headers())
             if resp.status_code in (200, 201):
                 data = resp.json()
                 return {
@@ -61,7 +62,7 @@ def trigger_airflow_dag(dag_id: str = DEFAULT_DAG_ID) -> Dict[str, Any]:
             if resp.status_code == 404:
                 alt_id = "aura_mlops_dag" if dag_id != "aura_mlops_dag" else "aura_realestate_mlops_pipeline"
                 alt_url = f"{AIRFLOW_BASE_URL}/dags/{alt_id}/dagRuns"
-                alt_resp = client.post(alt_url, json={}, headers=_get_auth_headers())
+                alt_resp = client.post(alt_url, json=payload, headers=_get_auth_headers())
                 if alt_resp.status_code in (200, 201):
                     alt_data = alt_resp.json()
                     return {

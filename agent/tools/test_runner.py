@@ -35,6 +35,11 @@ def check_module_importability(relative_path: str) -> Dict[str, Any]:
         
     script = f"""
 import sys
+try:
+    sys.stdout.reconfigure(encoding='utf-8')
+    sys.stderr.reconfigure(encoding='utf-8')
+except Exception:
+    pass
 from pathlib import Path
 import importlib.util
 
@@ -51,8 +56,16 @@ try:
         print("IMPORT_FAIL: spec_from_file_location trả về None")
         sys.exit(1)
     
-    # Chỉ compile mã kiểm tra cú pháp và định nghĩa cấp module
-    code = compile(file_path.read_text(encoding='utf-8', errors='replace'), str(file_path), 'exec')
+    # Thực thi nạp module để phát hiện lỗi runtime / NameError ở cấp module
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    # Đảm bảo module không bị rỗng và có ít nhất 1 hàm callable
+    callables = [k for k, v in mod.__dict__.items() if callable(v) and not k.startswith('_')]
+    if not callables:
+        print("IMPORT_FAIL: Module rỗng, không chứa hàm nghiệp vụ nào!")
+        sys.exit(3)
+
     print("IMPORT_SUCCESS")
     sys.exit(0)
 except Exception as e:
@@ -68,7 +81,7 @@ except Exception as e:
             text=True,
             encoding="utf-8",
             errors="replace",
-            timeout=10,
+            timeout=30,
             cwd=str(PROJECT_ROOT)
         )
         
@@ -107,6 +120,11 @@ def run_preprocessing_smoke_test() -> Dict[str, Any]:
     prep_dir = resolve_file_path("3_preprocessing/01_segment_filter.py").parent
     script = f"""
 import sys
+try:
+    sys.stdout.reconfigure(encoding='utf-8')
+    sys.stderr.reconfigure(encoding='utf-8')
+except Exception:
+    pass
 from pathlib import Path
 import importlib.util
 
@@ -132,7 +150,7 @@ sys.exit(0)
             text=True,
             encoding="utf-8",
             errors="replace",
-            timeout=10,
+            timeout=30,
             cwd=str(PROJECT_ROOT)
         )
         if res.returncode == 0 and "SMOKE_TEST_SUCCESS" in res.stdout:

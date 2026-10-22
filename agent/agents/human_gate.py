@@ -12,6 +12,7 @@ Nhiệm vụ:
 
 import sys
 import os
+import time
 import tempfile
 from typing import Dict, Any
 
@@ -38,9 +39,11 @@ def human_gate_node(state: AgentState) -> Dict[str, Any]:
     approved = state.get("human_approved", False)
     iterations = state.get("iteration_count", 0)
 
+    is_fallback = state.get("is_fallback", False)
+
     # 1. KẾT THÚC PHIÊN ĐO LƯỜNG MTTR TRONG METRICS COLLECTOR
-    final_status = "success" if (dag_status == "success" and approved) else "failed"
-    last_msg = state.get("messages", [{}])[-1].get("content", "")
+    final_status = "success" if (dag_status == "success" and approved and not is_fallback) else ("degraded" if is_fallback else "failed")
+    last_msg = state.get("supervisor_diagnosis") or state.get("messages", [{}])[-1].get("content", "")
     session_data = metrics_collector.end_session(
         final_status=final_status,
         final_r2=r2_score,
@@ -68,8 +71,15 @@ def human_gate_node(state: AgentState) -> Dict[str, Any]:
         pdf_path = None
 
     # 4. GỬI EMAIL THÔNG BÁO CHO QUẢN TRỊ VIÊN (CÓ CHỐNG SPAM RATE-LIMIT)
-    status_label = "SUCCESS" if approved else "ACTION_REQUIRED"
-    subject = f"Aura MLOps - Báo cáo vận hành: {status_label}"
+    if is_fallback or dag_status == "degraded":
+        status_label = "DEGRADED"
+        subject = "[CẢNH BÁO MLOPS] Aura MLOps: Sự cố kết nối Airflow (Sử dụng dữ liệu đệm)"
+    elif approved and dag_status == "success":
+        status_label = "SUCCESS"
+        subject = f"Aura MLOps - Báo cáo vận hành: SUCCESS"
+    else:
+        status_label = "ACTION_REQUIRED"
+        subject = f"Aura MLOps - Báo cáo vận hành: ACTION_REQUIRED"
     
     last_email_file = os.path.join(tempfile.gettempdir(), "aura_mlops_last_email.timestamp")
     should_send = True

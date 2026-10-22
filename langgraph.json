@@ -1,0 +1,7 @@
+{
+  "dependencies": ["./agent"],
+  "graphs": {
+    "aura_mlops": "./agent/core/engine.py:create_aura_workflow_graph"
+  },
+  "env": ".env"
+}

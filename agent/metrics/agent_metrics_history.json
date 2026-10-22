@@ -1902,5 +1902,839 @@
     "tool_reliability_pct": 100.0,
     "diagnosis": "[CẢNH BÁO VẬN HÀNH]: Tuần này Airflow gặp sự cố kết nối!\n-> Chi tiết lỗi: Không thể kết nối tới Airflow Webserver (http://localhost:8080/api/v1): [Errno 111] Connection refused\n-> Hệ thống tạm thời nạp kết quả đã lưu từ phiên trước trên đĩa cứng để báo cáo.\n\nPipeline MLOps hoàn thành xuất sắc!\n- Đánh giá mô hình: ĐẠT CHUẨN AN TOÀN VẬN HÀNH với R2 = 0.7182 (Ngưỡng yêu cầu >= 0.65), MAE = 0.2681, RMSE = 0.3753.\n- Trạng thái: Sẵn sàng phân phối mô hình mới ra Production Backend.",
     "iterations_detail": []
+  },
+  {
+    "session_id": "mlops_scheduled_20261020_164511",
+    "trigger_reason": "MODEL_EVALUATION",
+    "start_timestamp": "2026-10-20T16:45:13.246430",
+    "end_timestamp": "2026-10-20T16:45:13.247830",
+    "duration_seconds": 0.0,
+    "mttr_minutes": 0.0,
+    "status": "success",
+    "iteration_count": 1,
+    "pass_at_k": 0,
+    "initial_r2": 0.7182,
+    "final_r2": 0.7182,
+    "r2_improvement": 0.0,
+    "tool_calls": 0,
+    "failed_tool_calls": 0,
+    "tool_reliability_pct": 100.0,
+    "diagnosis": "Pipeline MLOps hoàn thành xuất sắc!\n- Đánh giá mô hình: ĐẠT CHUẨN AN TOÀN VẬN HÀNH với R2 = 0.7182 (Ngưỡng yêu cầu >= 0.65), MAE = 0.2681, RMSE = 0.3753.\n- Trạng thái: Sẵn sàng phân phối mô hình mới ra Production Backend.",
+    "iterations_detail": []
+  },
+  {
+    "session_id": "unit_test_session_001",
+    "trigger_reason": "TEST_EVAL",
+    "start_timestamp": "2026-10-20T17:13:51.173177",
+    "end_timestamp": "2026-10-20T17:13:51.173727",
+    "duration_seconds": 0.0,
+    "mttr_minutes": 0.0,
+    "status": "success",
+    "iteration_count": 1,
+    "pass_at_k": 1,
+    "initial_r2": 0.5,
+    "final_r2": 0.72,
+    "r2_improvement": 0.22,
+    "tool_calls": 1,
+    "failed_tool_calls": 0,
+    "tool_reliability_pct": 100.0,
+    "diagnosis": "",
+    "iterations_detail": [
+      {
+        "iteration": 1,
+        "target_file": "01_tune_ridge.py",
+        "syntax_valid": true,
+        "test_passed": true,
+        "timestamp": "2026-10-20T17:13:51.173659"
+      }
+    ]
+  },
+  {
+    "session_id": "session_0",
+    "trigger_reason": "MODEL_EVALUATION",
+    "start_timestamp": "2026-10-20T17:13:51.223226",
+    "end_timestamp": "2026-10-20T17:14:30.702768",
+    "duration_seconds": 39.48,
+    "mttr_minutes": 0.66,
+    "status": "success",
+    "iteration_count": 2,
+    "pass_at_k": 2,
+    "initial_r2": 0.74,
+    "final_r2": 0.73,
+    "r2_improvement": -0.01,
+    "tool_calls": 0,
+    "failed_tool_calls": 0,
+    "tool_reliability_pct": 100.0,
+    "diagnosis": "Mô hình đạt chuẩn sản xuất.",
+    "iterations_detail": [
+      {
+        "iteration": 1,
+        "target_file": "pipelines/6_modeling/01_tune_ridge.py",
+        "syntax_valid": true,
+        "test_passed": false,
+        "timestamp": "2026-10-20T17:14:30.321077"
+      },
+      {
+        "iteration": 1,
+        "target_file": "pipelines/6_modeling/01_tune_ridge.py",
+        "syntax_valid": true,
+        "test_passed": true,
+        "timestamp": "2026-10-20T17:14:30.634152"
+      }
+    ]
+  },
+  {
+    "session_id": "e2e_session_test",
+    "trigger_reason": "DAG_degraded",
+    "start_timestamp": "2026-10-20T17:14:37.893969",
+    "end_timestamp": "2026-10-20T17:14:37.894856",
+    "duration_seconds": 0.0,
+    "mttr_minutes": 0.0,
+    "status": "degraded",
+    "iteration_count": 1,
+    "pass_at_k": null,
+    "initial_r2": 0.7182,
+    "final_r2": 0.7182,
+    "r2_improvement": 0.0,
+    "tool_calls": 0,
+    "failed_tool_calls": 0,
+    "tool_reliability_pct": 100.0,
+    "diagnosis": "[CẢNH BÁO HẠ TẦNG MLOPS]: Airflow gặp sự cố kết nối!\n-> Chi tiết lỗi: Không thể kết nối tới Airflow Webserver (http://localhost:8080/api/v1): [Errno 111] Connection refused\n-> Cơ chế phòng vệ: Nạp snapshot dữ liệu đệm từ phiên trước để duy trì giám sát.\n-> Trạng thái dữ liệu: Snapshot có R2 = 0.7182 (Dữ liệu tuần này CHƯA được cập nhật).\n-> Khuyến nghị: Kiểm tra container aura_airflow_webserver hoặc mạng nội bộ Docker.",
+    "iterations_detail": []
+  },
+  {
+    "session_id": "e2e_session_test",
+    "trigger_reason": "DAG_degraded",
+    "start_timestamp": "2026-10-20T17:19:14.737174",
+    "end_timestamp": "2026-10-20T17:19:14.737628",
+    "duration_seconds": 0.0,
+    "mttr_minutes": 0.0,
+    "status": "degraded",
+    "iteration_count": 1,
+    "pass_at_k": null,
+    "initial_r2": 0.7182,
+    "final_r2": 0.7182,
+    "r2_improvement": 0.0,
+    "tool_calls": 0,
+    "failed_tool_calls": 0,
+    "tool_reliability_pct": 100.0,
+    "diagnosis": "[CẢNH BÁO HẠ TẦNG MLOPS]: Airflow gặp sự cố kết nối!\n-> Chi tiết lỗi: Không thể kết nối tới Airflow Webserver (http://localhost:8080/api/v1): [Errno 111] Connection refused\n-> Cơ chế phòng vệ: Nạp snapshot dữ liệu đệm từ phiên trước để duy trì giám sát.\n-> Trạng thái dữ liệu: Snapshot có R2 = 0.7182 (Dữ liệu tuần này CHƯA được cập nhật).\n-> Khuyến nghị: Kiểm tra container aura_airflow_webserver hoặc mạng nội bộ Docker.",
+    "iterations_detail": []
+  },
+  {
+    "session_id": "mlops_scheduled_20261020_172702",
+    "trigger_reason": "DAG_degraded",
+    "start_timestamp": "2026-10-20T17:27:03.441959",
+    "end_timestamp": "2026-10-20T17:27:03.442564",
+    "duration_seconds": 0.0,
+    "mttr_minutes": 0.0,
+    "status": "failed",
+    "iteration_count": 1,
+    "pass_at_k": null,
+    "initial_r2": 0.7182,
+    "final_r2": 0.7182,
+    "r2_improvement": 0.0,
+    "tool_calls": 0,
+    "failed_tool_calls": 0,
+    "tool_reliability_pct": 100.0,
+    "diagnosis": "[CẢNH BÁO HẠ TẦNG MLOPS]: Airflow gặp sự cố kết nối!\n-> Chi tiết lỗi: Airflow Webserver không phản hồi (Timeout / Offline)\n-> Cơ chế phòng vệ: Nạp snapshot dữ liệu đệm từ phiên trước để duy trì giám sát.\n-> Trạng thái dữ liệu: Snapshot có R2 = 0.7182 (Dữ liệu tuần này CHƯA được cập nhật).\n-> Khuyến nghị: Kiểm tra container aura_airflow_webserver hoặc mạng nội bộ Docker.",
+    "iterations_detail": []
+  },
+  {
+    "session_id": "mlops_scheduled_20261020_180705",
+    "trigger_reason": "DAG_queued",
+    "start_timestamp": "2026-10-20T18:07:18.331993",
+    "end_timestamp": "2026-10-20T18:07:18.336486",
+    "duration_seconds": 0.0,
+    "mttr_minutes": 0.0,
+    "status": "failed",
+    "iteration_count": 1,
+    "pass_at_k": null,
+    "initial_r2": 0.7182,
+    "final_r2": 0.7182,
+    "r2_improvement": 0.0,
+    "tool_calls": 0,
+    "failed_tool_calls": 0,
+    "tool_reliability_pct": 100.0,
+    "diagnosis": "Phát hiện sự cố cần khắc phục (Vòng 1/3):\n- Trạng thái DAG: queued (Task: Quality Gate)\n- Chỉ số hiện tại: R2 = 0.7182 (Yêu cầu >= 0.65)\n- Tệp mục tiêu can thiệp: 'pipelines/6_modeling/01_tune_ridge.py'\n- Nhiệm vụ: Giao quyền cho Coder Agent phân tích và đề xuất bản vá an toàn.",
+    "iterations_detail": []
+  },
+  {
+    "session_id": "mlops_scheduled_20261020_182011",
+    "trigger_reason": "DAG_failed",
+    "start_timestamp": "2026-10-20T18:22:20.133065",
+    "end_timestamp": "2026-10-20T18:22:20.142690",
+    "duration_seconds": 0.01,
+    "mttr_minutes": 0.0,
+    "status": "failed",
+    "iteration_count": 1,
+    "pass_at_k": null,
+    "initial_r2": 0.0,
+    "final_r2": null,
+    "r2_improvement": 0.0,
+    "tool_calls": 0,
+    "failed_tool_calls": 0,
+    "tool_reliability_pct": 100.0,
+    "diagnosis": "Phát hiện sự cố cần khắc phục (Vòng 1/3):\n- Trạng thái DAG: failed (Task: run_modular_mlops_pipeline)\n- Chỉ số hiện tại: R2 = 0.0 (Yêu cầu >= 0.65)\n- Tệp mục tiêu can thiệp: 'pipelines/6_modeling/01_tune_ridge.py'\n- Nhiệm vụ: Giao quyền cho Coder Agent phân tích và đề xuất bản vá an toàn.",
+    "iterations_detail": []
+  },
+  {
+    "session_id": "mlops_scheduled_20261020_185401",
+    "trigger_reason": "DAG_failed",
+    "start_timestamp": "2026-10-20T18:55:43.957752",
+    "end_timestamp": "2026-10-20T19:01:24.815355",
+    "duration_seconds": 340.86,
+    "mttr_minutes": 5.68,
+    "status": "failed",
+    "iteration_count": 6,
+    "pass_at_k": null,
+    "initial_r2": 0.0,
+    "final_r2": null,
+    "r2_improvement": 0.0,
+    "tool_calls": 0,
+    "failed_tool_calls": 0,
+    "tool_reliability_pct": 100.0,
+    "diagnosis": "[CẢNH BÁO QUÁ VÒNG LẶP]: Đã thử sửa lỗi 3/3 lần nhưng chưa đạt chuẩn.\nDừng vòng lặp tự động để chuyển sang chuyên gia con người can thiệp (Human-in-the-Loop).",
+    "iterations_detail": [
+      {
+        "iteration": 1,
+        "target_file": "pipelines/6_modeling/01_tune_ridge.py",
+        "syntax_valid": true,
+        "test_passed": false,
+        "timestamp": "2026-10-20T18:56:12.594415"
+      },
+      {
+        "iteration": 1,
+        "target_file": "pipelines/6_modeling/01_tune_ridge.py",
+        "syntax_valid": true,
+        "test_passed": true,
+        "timestamp": "2026-10-20T18:56:12.721031"
+      },
+      {
+        "iteration": 2,
+        "target_file": "pipelines/6_modeling/01_tune_ridge.py",
+        "syntax_valid": true,
+        "test_passed": false,
+        "timestamp": "2026-10-20T18:58:04.649983"
+      },
+      {
+        "iteration": 2,
+        "target_file": "pipelines/6_modeling/01_tune_ridge.py",
+        "syntax_valid": true,
+        "test_passed": true,
+        "timestamp": "2026-10-20T18:58:04.769350"
+      },
+      {
+        "iteration": 3,
+        "target_file": "pipelines/6_modeling/01_tune_ridge.py",
+        "syntax_valid": true,
+        "test_passed": false,
+        "timestamp": "2026-10-20T18:59:54.090972"
+      },
+      {
+        "iteration": 3,
+        "target_file": "pipelines/6_modeling/01_tune_ridge.py",
+        "syntax_valid": true,
+        "test_passed": true,
+        "timestamp": "2026-10-20T18:59:54.199591"
+      }
+    ]
+  },
+  {
+    "session_id": "mlops_scheduled_20261020_193002",
+    "trigger_reason": "DAG_failed",
+    "start_timestamp": "2026-10-20T19:31:51.739049",
+    "end_timestamp": "2026-10-20T19:37:57.762155",
+    "duration_seconds": 366.02,
+    "mttr_minutes": 6.1,
+    "status": "failed",
+    "iteration_count": 6,
+    "pass_at_k": null,
+    "initial_r2": 0.0,
+    "final_r2": null,
+    "r2_improvement": 0.0,
+    "tool_calls": 0,
+    "failed_tool_calls": 0,
+    "tool_reliability_pct": 100.0,
+    "diagnosis": "[CẢNH BÁO QUÁ VÒNG LẶP]: Đã thử sửa lỗi 3/3 lần nhưng chưa đạt chuẩn.\nDừng vòng lặp tự động để chuyển sang chuyên gia con người can thiệp (Human-in-the-Loop).",
+    "iterations_detail": [
+      {
+        "iteration": 1,
+        "target_file": "pipelines/6_modeling/01_tune_ridge.py",
+        "syntax_valid": true,
+        "test_passed": false,
+        "timestamp": "2026-10-20T19:32:15.094798"
+      },
+      {
+        "iteration": 1,
+        "target_file": "pipelines/6_modeling/01_tune_ridge.py",
+        "syntax_valid": true,
+        "test_passed": true,
+        "timestamp": "2026-10-20T19:32:15.286944"
+      },
+      {
+        "iteration": 2,
+        "target_file": "pipelines/6_modeling/01_tune_ridge.py",
+        "syntax_valid": true,
+        "test_passed": false,
+        "timestamp": "2026-10-20T19:34:25.367514"
+      },
+      {
+        "iteration": 2,
+        "target_file": "pipelines/6_modeling/01_tune_ridge.py",
+        "syntax_valid": true,
+        "test_passed": true,
+        "timestamp": "2026-10-20T19:34:25.506326"
+      },
+      {
+        "iteration": 3,
+        "target_file": "pipelines/6_modeling/01_tune_ridge.py",
+        "syntax_valid": true,
+        "test_passed": false,
+        "timestamp": "2026-10-20T19:36:31.311418"
+      },
+      {
+        "iteration": 3,
+        "target_file": "pipelines/6_modeling/01_tune_ridge.py",
+        "syntax_valid": true,
+        "test_passed": true,
+        "timestamp": "2026-10-20T19:36:31.500913"
+      }
+    ]
+  },
+  {
+    "session_id": "mlops_scheduled_20261020_200911",
+    "trigger_reason": "DAG_failed",
+    "start_timestamp": "2026-10-20T20:11:05.279524",
+    "end_timestamp": "2026-10-20T20:15:25.066322",
+    "duration_seconds": 259.79,
+    "mttr_minutes": 4.33,
+    "status": "failed",
+    "iteration_count": 6,
+    "pass_at_k": null,
+    "initial_r2": 0.0,
+    "final_r2": null,
+    "r2_improvement": 0.0,
+    "tool_calls": 0,
+    "failed_tool_calls": 0,
+    "tool_reliability_pct": 100.0,
+    "diagnosis": "[CẢNH BÁO QUÁ VÒNG LẶP]: Đã thử sửa lỗi 3/3 lần nhưng chưa đạt chuẩn.\nDừng vòng lặp tự động để chuyển sang chuyên gia con người can thiệp (Human-in-the-Loop).",
+    "iterations_detail": [
+      {
+        "iteration": 1,
+        "target_file": "pipelines/6_modeling/01_tune_ridge.py",
+        "syntax_valid": true,
+        "test_passed": false,
+        "timestamp": "2026-10-20T20:11:25.903206"
+      },
+      {
+        "iteration": 1,
+        "target_file": "pipelines/6_modeling/01_tune_ridge.py",
+        "syntax_valid": true,
+        "test_passed": false,
+        "timestamp": "2026-10-20T20:11:26.123689"
+      },
+      {
+        "iteration": 2,
+        "target_file": "pipelines/6_modeling/01_tune_ridge.py",
+        "syntax_valid": true,
+        "test_passed": false,
+        "timestamp": "2026-10-20T20:11:59.679701"
+      },
+      {
+        "iteration": 2,
+        "target_file": "pipelines/6_modeling/01_tune_ridge.py",
+        "syntax_valid": true,
+        "test_passed": true,
+        "timestamp": "2026-10-20T20:11:59.845135"
+      },
+      {
+        "iteration": 3,
+        "target_file": "pipelines/6_modeling/01_tune_ridge.py",
+        "syntax_valid": true,
+        "test_passed": false,
+        "timestamp": "2026-10-20T20:13:46.596685"
+      },
+      {
+        "iteration": 3,
+        "target_file": "pipelines/6_modeling/01_tune_ridge.py",
+        "syntax_valid": true,
+        "test_passed": true,
+        "timestamp": "2026-10-20T20:13:46.812003"
+      }
+    ]
+  },
+  {
+    "session_id": "mlops_scheduled_20261020_202913",
+    "trigger_reason": "DAG_failed",
+    "start_timestamp": "2026-10-20T20:31:01.665649",
+    "end_timestamp": "2026-10-20T20:31:56.135304",
+    "duration_seconds": 54.47,
+    "mttr_minutes": 0.91,
+    "status": "failed",
+    "iteration_count": 6,
+    "pass_at_k": null,
+    "initial_r2": 0.0,
+    "final_r2": null,
+    "r2_improvement": 0.0,
+    "tool_calls": 0,
+    "failed_tool_calls": 0,
+    "tool_reliability_pct": 100.0,
+    "diagnosis": "Phát hiện sự cố cần khắc phục (Vòng 1/3):\n- Trạng thái DAG: failed (Task: run_modular_mlops_pipeline)\n- Chỉ số hiện tại: R2 = 0.0 (Yêu cầu >= 0.65)\n- Tệp mục tiêu can thiệp: 'pipelines/6_modeling/01_tune_ridge.py'\n- Nhiệm vụ: Giao quyền cho Coder Agent phân tích và đề xuất bản vá an toàn.",
+    "iterations_detail": [
+      {
+        "iteration": 1,
+        "target_file": "pipelines/6_modeling/01_tune_ridge.py",
+        "syntax_valid": true,
+        "test_passed": false,
+        "timestamp": "2026-10-20T20:31:18.039177"
+      },
+      {
+        "iteration": 1,
+        "target_file": "pipelines/6_modeling/01_tune_ridge.py",
+        "syntax_valid": true,
+        "test_passed": false,
+        "timestamp": "2026-10-20T20:31:18.211171"
+      },
+      {
+        "iteration": 2,
+        "target_file": "pipelines/6_modeling/01_tune_ridge.py",
+        "syntax_valid": true,
+        "test_passed": false,
+        "timestamp": "2026-10-20T20:31:37.539185"
+      },
+      {
+        "iteration": 2,
+        "target_file": "pipelines/6_modeling/01_tune_ridge.py",
+        "syntax_valid": true,
+        "test_passed": false,
+        "timestamp": "2026-10-20T20:31:37.696603"
+      },
+      {
+        "iteration": 3,
+        "target_file": "pipelines/6_modeling/01_tune_ridge.py",
+        "syntax_valid": true,
+        "test_passed": false,
+        "timestamp": "2026-10-20T20:31:56.023710"
+      },
+      {
+        "iteration": 3,
+        "target_file": "pipelines/6_modeling/01_tune_ridge.py",
+        "syntax_valid": true,
+        "test_passed": false,
+        "timestamp": "2026-10-20T20:31:56.134269"
+      }
+    ]
+  },
+  {
+    "session_id": "mlops_scheduled_20261020_203806",
+    "trigger_reason": "DAG_failed",
+    "start_timestamp": "2026-10-20T20:39:39.361450",
+    "end_timestamp": "2026-10-20T20:40:34.781268",
+    "duration_seconds": 55.42,
+    "mttr_minutes": 0.92,
+    "status": "failed",
+    "iteration_count": 6,
+    "pass_at_k": null,
+    "initial_r2": 0.0,
+    "final_r2": null,
+    "r2_improvement": 0.0,
+    "tool_calls": 0,
+    "failed_tool_calls": 0,
+    "tool_reliability_pct": 100.0,
+    "diagnosis": "Phát hiện sự cố cần khắc phục (Vòng 1/3):\n- Trạng thái DAG: failed (Task: run_modular_mlops_pipeline)\n- Chỉ số hiện tại: R2 = 0.0 (Yêu cầu >= 0.65)\n- Tệp mục tiêu can thiệp: 'pipelines/6_modeling/01_tune_ridge.py'\n- Nhiệm vụ: Giao quyền cho Coder Agent phân tích và đề xuất bản vá an toàn.",
+    "iterations_detail": [
+      {
+        "iteration": 1,
+        "target_file": "pipelines/6_modeling/01_tune_ridge.py",
+        "syntax_valid": true,
+        "test_passed": false,
+        "timestamp": "2026-10-20T20:39:55.178955"
+      },
+      {
+        "iteration": 1,
+        "target_file": "pipelines/6_modeling/01_tune_ridge.py",
+        "syntax_valid": true,
+        "test_passed": false,
+        "timestamp": "2026-10-20T20:39:55.361987"
+      },
+      {
+        "iteration": 2,
+        "target_file": "pipelines/6_modeling/01_tune_ridge.py",
+        "syntax_valid": true,
+        "test_passed": false,
+        "timestamp": "2026-10-20T20:40:16.504130"
+      },
+      {
+        "iteration": 2,
+        "target_file": "pipelines/6_modeling/01_tune_ridge.py",
+        "syntax_valid": true,
+        "test_passed": false,
+        "timestamp": "2026-10-20T20:40:16.642788"
+      },
+      {
+        "iteration": 3,
+        "target_file": "pipelines/6_modeling/01_tune_ridge.py",
+        "syntax_valid": true,
+        "test_passed": false,
+        "timestamp": "2026-10-20T20:40:34.640540"
+      },
+      {
+        "iteration": 3,
+        "target_file": "pipelines/6_modeling/01_tune_ridge.py",
+        "syntax_valid": true,
+        "test_passed": false,
+        "timestamp": "2026-10-20T20:40:34.779331"
+      }
+    ]
+  },
+  {
+    "session_id": "mlops_scheduled_20261020_204901",
+    "trigger_reason": "DAG_failed",
+    "start_timestamp": "2026-10-20T20:50:36.353520",
+    "end_timestamp": "2026-10-20T20:51:23.488898",
+    "duration_seconds": 47.14,
+    "mttr_minutes": 0.79,
+    "status": "failed",
+    "iteration_count": 6,
+    "pass_at_k": null,
+    "initial_r2": 0.0,
+    "final_r2": null,
+    "r2_improvement": 0.0,
+    "tool_calls": 0,
+    "failed_tool_calls": 0,
+    "tool_reliability_pct": 100.0,
+    "diagnosis": "Phát hiện sự cố cần khắc phục (Vòng 1/3):\n- Trạng thái DAG: failed (Task: run_modular_mlops_pipeline)\n- Chỉ số hiện tại: R2 = 0.0 (Yêu cầu >= 0.65)\n- Tệp mục tiêu can thiệp: 'pipelines/6_modeling/01_tune_ridge.py'\n- Nhiệm vụ: Giao quyền cho Coder Agent phân tích và đề xuất bản vá an toàn.",
+    "iterations_detail": [
+      {
+        "iteration": 1,
+        "target_file": "pipelines/6_modeling/01_tune_ridge.py",
+        "syntax_valid": true,
+        "test_passed": false,
+        "timestamp": "2026-10-20T20:50:53.225768"
+      },
+      {
+        "iteration": 1,
+        "target_file": "pipelines/6_modeling/01_tune_ridge.py",
+        "syntax_valid": true,
+        "test_passed": false,
+        "timestamp": "2026-10-20T20:50:53.401718"
+      },
+      {
+        "iteration": 2,
+        "target_file": "pipelines/6_modeling/01_tune_ridge.py",
+        "syntax_valid": true,
+        "test_passed": false,
+        "timestamp": "2026-10-20T20:51:09.348219"
+      },
+      {
+        "iteration": 2,
+        "target_file": "pipelines/6_modeling/01_tune_ridge.py",
+        "syntax_valid": true,
+        "test_passed": false,
+        "timestamp": "2026-10-20T20:51:09.404670"
+      },
+      {
+        "iteration": 3,
+        "target_file": "pipelines/6_modeling/01_tune_ridge.py",
+        "syntax_valid": true,
+        "test_passed": false,
+        "timestamp": "2026-10-20T20:51:23.443381"
+      },
+      {
+        "iteration": 3,
+        "target_file": "pipelines/6_modeling/01_tune_ridge.py",
+        "syntax_valid": true,
+        "test_passed": false,
+        "timestamp": "2026-10-20T20:51:23.487329"
+      }
+    ]
+  },
+  {
+    "session_id": "mlops_scheduled_20261020_210508",
+    "trigger_reason": "DAG_failed",
+    "start_timestamp": "2026-10-20T21:06:46.903365",
+    "end_timestamp": "2026-10-20T21:07:41.854190",
+    "duration_seconds": 54.95,
+    "mttr_minutes": 0.92,
+    "status": "failed",
+    "iteration_count": 6,
+    "pass_at_k": null,
+    "initial_r2": 0.0,
+    "final_r2": null,
+    "r2_improvement": 0.0,
+    "tool_calls": 0,
+    "failed_tool_calls": 0,
+    "tool_reliability_pct": 100.0,
+    "diagnosis": "Phát hiện sự cố cần khắc phục (Vòng 1/3):\n- Trạng thái DAG: failed (Task: run_modular_mlops_pipeline)\n- Chỉ số hiện tại: R2 = 0.0 (Yêu cầu >= 0.65)\n- Tệp mục tiêu can thiệp: 'pipelines/6_modeling/01_tune_ridge.py'\n- Nhiệm vụ: Giao quyền cho Coder Agent phân tích và đề xuất bản vá an toàn.",
+    "iterations_detail": [
+      {
+        "iteration": 1,
+        "target_file": "pipelines/6_modeling/01_tune_ridge.py",
+        "syntax_valid": true,
+        "test_passed": false,
+        "timestamp": "2026-10-20T21:07:03.722928"
+      },
+      {
+        "iteration": 1,
+        "target_file": "pipelines/6_modeling/01_tune_ridge.py",
+        "syntax_valid": true,
+        "test_passed": false,
+        "timestamp": "2026-10-20T21:07:03.867172"
+      },
+      {
+        "iteration": 2,
+        "target_file": "pipelines/6_modeling/01_tune_ridge.py",
+        "syntax_valid": true,
+        "test_passed": false,
+        "timestamp": "2026-10-20T21:07:23.441168"
+      },
+      {
+        "iteration": 2,
+        "target_file": "pipelines/6_modeling/01_tune_ridge.py",
+        "syntax_valid": true,
+        "test_passed": false,
+        "timestamp": "2026-10-20T21:07:23.621415"
+      },
+      {
+        "iteration": 3,
+        "target_file": "pipelines/6_modeling/01_tune_ridge.py",
+        "syntax_valid": true,
+        "test_passed": false,
+        "timestamp": "2026-10-20T21:07:41.695358"
+      },
+      {
+        "iteration": 3,
+        "target_file": "pipelines/6_modeling/01_tune_ridge.py",
+        "syntax_valid": true,
+        "test_passed": false,
+        "timestamp": "2026-10-20T21:07:41.850486"
+      }
+    ]
+  },
+  {
+    "session_id": "mlops_scheduled_20261020_212212",
+    "trigger_reason": "MODEL_EVALUATION",
+    "start_timestamp": "2026-10-20T21:23:35.283434",
+    "end_timestamp": "2026-10-20T21:23:35.288757",
+    "duration_seconds": 0.01,
+    "mttr_minutes": 0.0,
+    "status": "success",
+    "iteration_count": 1,
+    "pass_at_k": 0,
+    "initial_r2": 0.769,
+    "final_r2": 0.769,
+    "r2_improvement": 0.0,
+    "tool_calls": 0,
+    "failed_tool_calls": 0,
+    "tool_reliability_pct": 100.0,
+    "diagnosis": "Pipeline MLOps hoàn thành xuất sắc!\n- Đánh giá mô hình: ĐẠT CHUẨN AN TOÀN VẬN HÀNH với R2 = 0.769 (Ngưỡng yêu cầu >= 0.65), MAE = 0.2523, RMSE = 0.3464.\n- Trạng thái: Sẵn sàng phân phối mô hình mới ra Production Backend.",
+    "iterations_detail": []
+  },
+  {
+    "session_id": "mlops_scheduled_20261020_214306",
+    "trigger_reason": "DAG_failed",
+    "start_timestamp": "2026-10-20T21:44:43.346198",
+    "end_timestamp": "2026-10-20T21:46:11.997376",
+    "duration_seconds": 88.65,
+    "mttr_minutes": 1.48,
+    "status": "success",
+    "iteration_count": 2,
+    "pass_at_k": 2,
+    "initial_r2": 0.0,
+    "final_r2": 0.769,
+    "r2_improvement": 0.0,
+    "tool_calls": 0,
+    "failed_tool_calls": 0,
+    "tool_reliability_pct": 100.0,
+    "diagnosis": "Pipeline MLOps hoàn thành xuất sắc!\n- Đánh giá mô hình: ĐẠT CHUẨN AN TOÀN VẬN HÀNH với R2 = 0.769 (Ngưỡng yêu cầu >= 0.65), MAE = 0.2523, RMSE = 0.3464.\n- Trạng thái: Sẵn sàng phân phối mô hình mới ra Production Backend.",
+    "iterations_detail": [
+      {
+        "iteration": 1,
+        "target_file": "pipelines/6_modeling/01_tune_ridge.py",
+        "syntax_valid": true,
+        "test_passed": false,
+        "timestamp": "2026-10-20T21:44:59.980314"
+      },
+      {
+        "iteration": 1,
+        "target_file": "pipelines/6_modeling/01_tune_ridge.py",
+        "syntax_valid": true,
+        "test_passed": true,
+        "timestamp": "2026-10-20T21:45:06.113552"
+      }
+    ]
+  },
+  {
+    "session_id": "mlops_scheduled_20261020_224208",
+    "trigger_reason": "DAG_failed",
+    "start_timestamp": "2026-10-20T22:43:32.453969",
+    "end_timestamp": "2026-10-20T22:45:16.473778",
+    "duration_seconds": 104.02,
+    "mttr_minutes": 1.73,
+    "status": "success",
+    "iteration_count": 2,
+    "pass_at_k": 2,
+    "initial_r2": 0.0,
+    "final_r2": 0.7585,
+    "r2_improvement": 0.0,
+    "tool_calls": 0,
+    "failed_tool_calls": 0,
+    "tool_reliability_pct": 100.0,
+    "diagnosis": "Pipeline MLOps hoàn thành xuất sắc!\n- Đánh giá mô hình: ĐẠT CHUẨN AN TOÀN VẬN HÀNH với R2 = 0.7585 (Ngưỡng yêu cầu >= 0.65), MAE = 0.2645, RMSE = 0.3709.\n- Trạng thái Deploy: CHỜ DEVELOPER PHÊ DUYỆT (Chưa đưa lên Production).\n- Mô hình ứng viên: R2 = 0.7585 (Vượt qua mốc cũ R2 = N/A).\n- Vị trí lưu trữ: model_registry/\n- Hành động: Để deploy mô hình này, Developer chạy: python -m agent.tools.deploy_model --latest",
+    "iterations_detail": [
+      {
+        "iteration": 1,
+        "target_file": "pipelines/5_split/01_data_splitter.py",
+        "syntax_valid": true,
+        "test_passed": false,
+        "timestamp": "2026-10-20T22:44:17.171008"
+      },
+      {
+        "iteration": 1,
+        "target_file": "pipelines/5_split/01_data_splitter.py",
+        "syntax_valid": true,
+        "test_passed": true,
+        "timestamp": "2026-10-20T22:44:21.844534"
+      }
+    ]
+  },
+  {
+    "session_id": "mlops_scheduled_20261021_080208",
+    "trigger_reason": "DAG_degraded",
+    "start_timestamp": "2026-10-21T08:02:10.446892",
+    "end_timestamp": "2026-10-21T08:02:10.448494",
+    "duration_seconds": 0.0,
+    "mttr_minutes": 0.0,
+    "status": "degraded",
+    "iteration_count": 1,
+    "pass_at_k": null,
+    "initial_r2": 0.7585,
+    "final_r2": 0.7585,
+    "r2_improvement": 0.0,
+    "tool_calls": 0,
+    "failed_tool_calls": 0,
+    "tool_reliability_pct": 100.0,
+    "diagnosis": "[CẢNH BÁO HẠ TẦNG MLOPS]: Airflow gặp sự cố kết nối!\n-> Chi tiết lỗi: Không thể kết nối tới Airflow Webserver (http://airflow-webserver:8080/api/v1): [Errno 111] Connection refused\n-> Cơ chế phòng vệ: Nạp snapshot dữ liệu đệm từ phiên trước để duy trì giám sát.\n-> Trạng thái dữ liệu: Snapshot có R2 = 0.7585 (Dữ liệu tuần này CHƯA được cập nhật).\n-> Khuyến nghị: Kiểm tra container aura_airflow_webserver hoặc mạng nội bộ Docker.",
+    "iterations_detail": []
+  },
+  {
+    "session_id": "mlops_scheduled_20261021_081009",
+    "trigger_reason": "MODEL_EVALUATION",
+    "start_timestamp": "2026-10-21T08:11:32.011889",
+    "end_timestamp": "2026-10-21T08:14:44.682671",
+    "duration_seconds": 192.67,
+    "mttr_minutes": 3.21,
+    "status": "success",
+    "iteration_count": 6,
+    "pass_at_k": 6,
+    "initial_r2": 0.5261,
+    "final_r2": 0.7585,
+    "r2_improvement": 0.2324,
+    "tool_calls": 0,
+    "failed_tool_calls": 0,
+    "tool_reliability_pct": 100.0,
+    "diagnosis": "Pipeline MLOps hoàn thành xuất sắc!\n- Đánh giá mô hình: ĐẠT CHUẨN AN TOÀN VẬN HÀNH với R2 = 0.7585 (Ngưỡng yêu cầu >= 0.65), MAE = 0.2642, RMSE = 0.3709.\n- Trạng thái Deploy: CHỜ DEVELOPER PHÊ DUYỆT (Chưa đưa lên Production).\n- Mô hình ứng viên: R2 = 0.7585 (Vượt qua mốc cũ R2 = N/A).\n- Vị trí lưu trữ: model_registry/\n- Hành động: Để deploy mô hình này, Developer chạy: python -m agent.tools.deploy_model --latest",
+    "iterations_detail": [
+      {
+        "iteration": 1,
+        "target_file": "pipelines/6_modeling/04_train_stacking.py",
+        "syntax_valid": true,
+        "test_passed": false,
+        "timestamp": "2026-10-21T08:12:29.585297"
+      },
+      {
+        "iteration": 1,
+        "target_file": "pipelines/6_modeling/04_train_stacking.py",
+        "syntax_valid": true,
+        "test_passed": false,
+        "timestamp": "2026-10-21T08:12:36.083293"
+      },
+      {
+        "iteration": 2,
+        "target_file": "pipelines/6_modeling/04_train_stacking.py",
+        "syntax_valid": true,
+        "test_passed": false,
+        "timestamp": "2026-10-21T08:12:59.523851"
+      },
+      {
+        "iteration": 2,
+        "target_file": "pipelines/6_modeling/04_train_stacking.py",
+        "syntax_valid": true,
+        "test_passed": false,
+        "timestamp": "2026-10-21T08:13:02.678424"
+      },
+      {
+        "iteration": 3,
+        "target_file": "pipelines/6_modeling/04_train_stacking.py",
+        "syntax_valid": true,
+        "test_passed": false,
+        "timestamp": "2026-10-21T08:13:22.100692"
+      },
+      {
+        "iteration": 3,
+        "target_file": "pipelines/6_modeling/04_train_stacking.py",
+        "syntax_valid": true,
+        "test_passed": true,
+        "timestamp": "2026-10-21T08:13:24.227934"
+      }
+    ]
+  },
+  {
+    "session_id": "mlops_scheduled_20261021_113005",
+    "trigger_reason": "MODEL_EVALUATION",
+    "start_timestamp": "2026-10-21T11:31:35.345413",
+    "end_timestamp": "2026-10-21T11:31:35.356812",
+    "duration_seconds": 0.01,
+    "mttr_minutes": 0.0,
+    "status": "success",
+    "iteration_count": 1,
+    "pass_at_k": 0,
+    "initial_r2": 0.7646,
+    "final_r2": 0.7646,
+    "r2_improvement": 0.0,
+    "tool_calls": 0,
+    "failed_tool_calls": 0,
+    "tool_reliability_pct": 100.0,
+    "diagnosis": "Pipeline MLOps hoàn thành xuất sắc!\n- Đánh giá mô hình: ĐẠT CHUẨN AN TOÀN VẬN HÀNH với R2 = 0.7646 (Ngưỡng yêu cầu >= 0.65), MAE = 0.2469, RMSE = 0.3441.\n- Trạng thái Deploy: CHỜ DEVELOPER PHÊ DUYỆT (Chưa đưa lên Production).\n- Mô hình ứng viên: R2 = 0.7646 (Vượt qua mốc cũ R2 = N/A).\n- Vị trí lưu trữ: model_registry/\n- Hành động: Để deploy mô hình này, Developer chạy: python -m agent.tools.deploy_model --latest",
+    "iterations_detail": []
+  },
+  {
+    "session_id": "mlops_scheduled_20261021_113512",
+    "trigger_reason": "MODEL_EVALUATION",
+    "start_timestamp": "2026-10-21T11:36:44.150193",
+    "end_timestamp": "2026-10-21T11:36:44.165312",
+    "duration_seconds": 0.02,
+    "mttr_minutes": 0.0,
+    "status": "success",
+    "iteration_count": 1,
+    "pass_at_k": 0,
+    "initial_r2": 0.7646,
+    "final_r2": 0.7646,
+    "r2_improvement": 0.0,
+    "tool_calls": 0,
+    "failed_tool_calls": 0,
+    "tool_reliability_pct": 100.0,
+    "diagnosis": "Pipeline MLOps hoàn thành xuất sắc!\n- Đánh giá mô hình: ĐẠT CHUẨN AN TOÀN VẬN HÀNH với R2 = 0.7646 (Ngưỡng yêu cầu >= 0.65), MAE = 0.2469, RMSE = 0.3441.\n- Trạng thái Deploy: CHỜ DEVELOPER PHÊ DUYỆT (Chưa đưa lên Production).\n- Mô hình ứng viên: R2 = 0.7646 (Vượt qua mốc cũ R2 = N/A).\n- Vị trí lưu trữ: model_registry/\n- Hành động: Để deploy mô hình này, Developer chạy: python -m agent.tools.deploy_model --latest",
+    "iterations_detail": []
+  },
+  {
+    "session_id": "session_0",
+    "trigger_reason": "MODEL_EVALUATION",
+    "start_timestamp": "2026-10-21T12:10:06.018619",
+    "end_timestamp": "2026-10-21T12:10:06.034059",
+    "duration_seconds": 0.02,
+    "mttr_minutes": 0.0,
+    "status": "success",
+    "iteration_count": 1,
+    "pass_at_k": 0,
+    "initial_r2": 0.7646,
+    "final_r2": 0.7646,
+    "r2_improvement": 0.0,
+    "tool_calls": 0,
+    "failed_tool_calls": 0,
+    "tool_reliability_pct": 100.0,
+    "diagnosis": "Pipeline MLOps hoàn thành xuất sắc!\n- Đánh giá mô hình: ĐẠT CHUẨN AN TOÀN VẬN HÀNH với R2 = 0.7646 (Ngưỡng yêu cầu >= 0.65), MAE = 0.2469, RMSE = 0.3441.\n- Trạng thái Deploy: CHỜ DEVELOPER PHÊ DUYỆT (Chưa đưa lên Production).\n- Mô hình ứng viên: R2 = 0.7646 (Vượt qua mốc cũ R2 = N/A).\n- Vị trí lưu trữ: model_registry/\n- Hành động: Để deploy mô hình này, Developer chạy: python -m agent.tools.deploy_model --latest",
+    "iterations_detail": []
   }
 ]

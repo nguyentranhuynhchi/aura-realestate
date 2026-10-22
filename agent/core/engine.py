@@ -42,6 +42,7 @@ def run_native_workflow(initial_state: AgentState, max_steps: int = 15) -> Agent
         "human_gate": human_gate_node,
     }
 
+
     while current_node != "__end__" and step_count < max_steps:
         step_count += 1
         node_fn = nodes.get(current_node)
@@ -49,9 +50,13 @@ def run_native_workflow(initial_state: AgentState, max_steps: int = 15) -> Agent
             print(f" [ENGINE LỖI]: Không tìm thấy Node '{current_node}'!")
             break
 
+
+
         print(f"\n>>> [WORKFLOW ENGINE] Bước {step_count}: Đang thực thi Node '{current_node}'")
         updates = node_fn(current_state)
         current_state.update(updates)
+
+
 
         # Điều hướng trạng thái tiếp theo
         next_step = updates.get("next_step")
@@ -96,7 +101,18 @@ def create_aura_workflow_graph():
         workflow.add_edge("airflow_runner", "supervisor")
 
         def supervisor_router(state: AgentState):
-            return state.get("next_step", "human_gate")
+            step = state.get("next_step")
+            if step in ["coder", "human_gate"]:
+                return step
+            # Phòng vệ dự phòng: nếu có lỗi hoặc R2 < 0.65 mà chưa hết 3 vòng lặp thì sang Coder
+            dag_status = state.get("dag_status", "failed")
+            metrics = state.get("model_metrics", {})
+            r2_score = float(metrics.get("r2", 0.0)) if metrics else 0.0
+            iteration = state.get("iteration_count", 0)
+            max_iter = state.get("max_iterations", 3)
+            if (dag_status != "success" or r2_score < 0.65) and iteration < max_iter:
+                return "coder"
+            return "human_gate"
 
         workflow.add_conditional_edges(
             "supervisor",

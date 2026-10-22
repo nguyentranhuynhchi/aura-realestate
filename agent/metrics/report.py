@@ -35,5 +35,25 @@ def generate_enterprise_metrics_markdown(summary: Dict[str, Any] = None) -> str:
 * **AST Syntax Checking:** 100% bản vá được parse AST trước khi ghi vào Sandbox.
 * **Isolated Import Check:** Chạy thử nghiệm trong Subprocess cô lập không gây crash.
 * **Dual Sandbox Architecture:** Giữ nguyên 100% Baseline chuẩn mốc, chỉ tác động trên `update_code/`.
+
+## 4. HƯỚNG DẪN QUẢN TRỊ TRIỂN KHAI CHO DEVELOPER (HUMAN-IN-THE-LOOP)
+### A. Đồng bộ mã nguồn từ Sandbox sang Baseline (Khi hài lòng với bản vá):
+```powershell
+Copy-Item -Path "agent\\sandbox\\update_code\\*" -Destination "agent\\sandbox\\baseline\\" -Recurse -Force
+```
+
+### B. Phê duyệt & Deploy mô hình ứng viên lên Production Backend:
+* **Xem danh sách và điểm số các mô hình trong Registry:**
+  ```powershell
+  python -m agent.tools.deploy_model --list
+  ```
+* **Phê duyệt đưa mô hình Champion mới nhất lên Production Backend (Tự động sao lưu mô hình cũ):**
+  ```powershell
+  python -m agent.tools.deploy_model --latest
+  ```
+* **Phục hồi (Rollback) mô hình cũ nếu phát sinh sự cố:**
+  ```powershell
+  python -m agent.tools.deploy_model --rollback
+  ```
 """
     return md

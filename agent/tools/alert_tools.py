@@ -28,15 +28,49 @@ def send_email_alert(subject: str, diagnosis: str, diff_code: Optional[str] = ""
     msg = MIMEMultipart()
     msg["From"] = f"Aura MLOps Agent <{smtp_user}>"
     msg["To"] = recipient
-    msg["Subject"] = f"[{status}] {subject} - {os.getenv('HOSTNAME', 'Docker')}"
+    if subject.startswith(f"[{status}]") or subject.startswith("["):
+        msg["Subject"] = f"{subject} - {os.getenv('HOSTNAME', 'Docker')}"
+    else:
+        msg["Subject"] = f"[{status}] {subject} - {os.getenv('HOSTNAME', 'Docker')}"
+
+    sync_note = ""
+    if diff_code and status == "SUCCESS":
+        sync_note = """
+    <div style="background: #eff6ff; border-left: 4px solid #2563eb; padding: 14px; margin-top: 15px; border-radius: 6px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+        <p style="margin: 0; color: #1e40af; font-weight: bold; font-size: 15px;">📢 1. ĐỒNG BỘ MÃ NGUỒN (CODE UPDATE):</p>
+        <p style="margin: 6px 0 8px 0; color: #1e3a8a; font-size: 13px;">Coder Agent đã tạo bản vá tối ưu hơn trong thư mục <code>agent/sandbox/update_code/</code>. Kho <code>baseline/</code> vẫn được giữ nguyên an toàn. Nếu muốn cập nhật code này làm chuẩn mốc mới, bạn chạy lệnh PowerShell sau:</p>
+        <pre style="background: #1e293b; color: #f8fafc; padding: 10px 12px; border-radius: 4px; font-size: 12.5px; overflow-x: auto; margin: 0; font-family: Consolas, 'Courier New', monospace;">Copy-Item -Path "agent\\sandbox\\update_code\\*" -Destination "agent\\sandbox\\baseline\\" -Recurse -Force</pre>
+    </div>
+    """
+
+    deploy_note = ""
+    if status == "SUCCESS":
+        deploy_note = """
+    <div style="background: #fefce8; border-left: 4px solid #ca8a04; padding: 14px; margin-top: 15px; border-radius: 6px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+        <p style="margin: 0; color: #854d0e; font-weight: bold; font-size: 15px;">🛡️ 2. QUY TRÌNH PHÊ DUYỆT DEPLOY MÔ HÌNH (HUMAN-IN-THE-LOOP):</p>
+        <p style="margin: 6px 0 8px 0; color: #713f12; font-size: 13px;">Mô hình mới <b>KHÔNG</b> tự động ghi đè lên Production Backend mà được lưu an toàn tại <code>model_registry/</code> chờ quyết định của bạn.</p>
+        
+        <p style="margin: 10px 0 4px 0; font-weight: bold; color: #854d0e; font-size: 13px;">👉 Bước 1: Xem danh sách so găng các phiên bản mô hình:</p>
+        <pre style="background: #1e293b; color: #f8fafc; padding: 8px 12px; border-radius: 4px; font-size: 12.5px; margin: 0 0 8px 0; font-family: Consolas, 'Courier New', monospace;">python -m agent.tools.deploy_model --list</pre>
+
+        <p style="margin: 8px 0 4px 0; font-weight: bold; color: #854d0e; font-size: 13px;">👉 Bước 2: Phê duyệt Deploy phiên bản mới nhất lên Production Backend (Tự động Backup mô hình cũ):</p>
+        <pre style="background: #1e293b; color: #38bdf8; padding: 8px 12px; border-radius: 4px; font-size: 12.5px; margin: 0 0 6px 0; font-family: Consolas, 'Courier New', monospace;">python -m agent.tools.deploy_model --latest</pre>
+        <p style="margin: 0 0 10px 0; color: #713f12; font-size: 12px;"><i>(Lệnh chạy trong Docker container: <code>docker exec -it aura_agent_service python -m agent.tools.deploy_model --latest -y</code>)</i></p>
+
+        <p style="margin: 8px 0 4px 0; font-weight: bold; color: #854d0e; font-size: 13px;">👉 Bước 3: Hoàn tác về mô hình cũ ngay lập tức nếu cần (Rollback Safety):</p>
+        <pre style="background: #1e293b; color: #f87171; padding: 8px 12px; border-radius: 4px; font-size: 12.5px; margin: 0; font-family: Consolas, 'Courier New', monospace;">python -m agent.tools.deploy_model --rollback</pre>
+    </div>
+    """
 
     body_html = f"""
     <h3>HỆ THỐNG MULTI-AGENT MLOPS TỰ HÀNH - BÁO CÁO VẬN HÀNH</h3>
-    <p><b>Trạng thái:</b> <span style="color: {'green' if status == 'SUCCESS' else 'red'}; font-weight: bold;">{status}</span></p>
+    <p><b>Trạng thái:</b> <span style="color: {'#16a34a' if status == 'SUCCESS' else ('#d97706' if status == 'DEGRADED' else '#dc2626')}; font-weight: bold;">{status}</span></p>
     <p><b>Chẩn đoán của Supervisor:</b></p>
-    <blockquote style="background: #f8f9fa; border-left: 4px solid #007bff; padding: 10px;">
+    <blockquote style="background: #f8f9fa; border-left: 4px solid {'#16a34a' if status == 'SUCCESS' else ('#d97706' if status == 'DEGRADED' else '#dc2626')}; padding: 10px;">
         {diagnosis.replace(chr(10), '<br>')}
     </blockquote>
+{sync_note}
+{deploy_note}
     <p><i>Bản báo cáo thẩm định chi tiết định dạng PDF đã được đính kèm vào email này.</i></p>
     """
     msg.attach(MIMEText(body_html, "html", "utf-8"))

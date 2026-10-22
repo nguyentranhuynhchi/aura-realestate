@@ -116,7 +116,7 @@ with DAG(
     run_modular_pipeline_task = BashOperator(
         task_id="run_modular_mlops_pipeline",
         bash_command=(
-            'python {{ dag_run.conf.get("pipeline_dir", "/app/agent/sandbox/baseline") }}/run_pipeline.py '
+            'python {{ dag_run.conf.get("pipeline_dir", "/app/agent/sandbox/update_code") }}/run_pipeline.py '
             '{{ ti.xcom_pull(task_ids="init_mlops_logistics_task", key="retrain_timestamp") }}'
         ),
     )

@@ -97,10 +97,17 @@ def validate_python_syntax(code: str, filename: str = "snippet.py") -> Tuple[boo
     """
     Rào chắn cú pháp AST (Abstract Syntax Tree Guardrail).
     Phân tích cây cú pháp của mã Python trước khi cho phép ghi vào đĩa.
+    Bảo vệ chống lại mã rỗng, mã viết tắt '...' hoặc code thiếu định nghĩa hàm.
     
     Returns:
         (is_valid, message, line_number, column_offset)
     """
+    if not code or len(code.strip().splitlines()) < 3 or code.strip() == "...":
+        return False, "[LỖI CÚ PHÁP AST] Mã nguồn bị rỗng hoặc viết tắt '...'", 1, 0
+
+    if "def " not in code and "import " not in code:
+        return False, "[LỖI CÚ PHÁP AST] Mã nguồn bị cắt ngắn, không chứa định nghĩa hàm def hay thư viện nào!", 1, 0
+
     try:
         ast.parse(code, filename=filename)
         return True, f"Cú pháp tệp '{filename}' hoàn toàn hợp lệ (AST Clean).", 0, 0

@@ -24,6 +24,9 @@ class AgentState(TypedDict, total=False):
     dag_status: str               # "success" | "failed" | "running" | "upstream_failed"
     error_logs: str               # Log lỗi trích xuất từ tác vụ thất bại
     failed_task_id: Optional[str] # Tên task bị hỏng (ví dụ: 'tune_ridge_task')
+    is_fallback: Optional[bool]
+    fallback_reason: Optional[str]
+    pipeline_summary: Optional[Dict[str, Any]]
     
     # 2. Ngữ cảnh sửa lỗi & Mã nguồn
     target_file: Optional[str]    # Đường dẫn tệp mục tiêu (ví dụ: 'pipelines/6_modeling/01_tune_ridge.py')
@@ -42,8 +45,11 @@ class AgentState(TypedDict, total=False):
     iteration_count: int          # Số lần Agent đã cố gắng sửa code (tối đa max_iterations)
     max_iterations: int           # Ngưỡng dừng tối đa (mặc định = 3 để tính Pass@3)
     human_approved: bool          # Đã được người quản trị hoặc cổng Human Gate duyệt
+    next_step: Optional[str]      # Điều hướng Node ("supervisor" | "coder" | "validator" | "human_gate" | "__end__")
     
     # 6. Nhật ký đối thoại & Đo lường doanh nghiệp
     messages: List[Dict[str, Any]]
     session_id: str               # Mã định danh phiên sửa lỗi (dùng tính MTTR)
     start_time: float             # Thời điểm bắt đầu phát hiện sự cố
+    supervisor_diagnosis: Optional[str]
+    status_label: Optional[str]

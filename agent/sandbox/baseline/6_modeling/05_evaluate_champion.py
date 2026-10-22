@@ -6,7 +6,12 @@ import numpy as np
 from sklearn.metrics import r2_score, mean_absolute_error, root_mean_squared_error
 
 def evaluate_and_promote(model, X_test: np.ndarray, y_test: np.ndarray, exp_dir: str, registry_dir: str, backend_dir: str = None) -> dict:
-    """Đánh giá mô hình trên tập Test, so găng Champion vs Challenger và tự động thăng cấp nếu vượt trội."""
+    """
+    Đánh giá mô hình trên tập Test, so găng Champion vs Challenger.
+    LƯU Ý QUẢN TRỊ MLOPS: Tuyệt đối KHÔNG tự động ghi đè lên Production Backend.
+    Mô hình mới nếu vượt trội sẽ được lưu vào Model Registry với trạng thái 'Champion_Candidate'
+    chờ quyết định phê duyệt Deploy chính thức từ Developer (Human-in-the-Loop).
+    """
     preds = model.predict(X_test)
     r2 = float(r2_score(y_test, preds))
     mae = float(mean_absolute_error(y_test, preds))
@@ -16,7 +21,7 @@ def evaluate_and_promote(model, X_test: np.ndarray, y_test: np.ndarray, exp_dir:
     challenger_model_path = os.path.join(exp_dir, "model.pkl")
     joblib.dump(model, challenger_model_path)
     
-    # Tìm Champion tốt nhất trước đó
+    # Tìm Champion tốt nhất trước đó trong Model Registry
     r2_champion = -999.0
     best_champ_dir = None
     if os.path.exists(registry_dir):
@@ -30,18 +35,21 @@ def evaluate_and_promote(model, X_test: np.ndarray, y_test: np.ndarray, exp_dir:
                     r2_champion = json.load(f).get("R2_score", -999.0)
 
     is_promoted = r2 > r2_champion
-    status = "Champion" if is_promoted else "Challenger"
+    status = "Champion_Candidate" if is_promoted else "Challenger"
+    deployment_status = "PENDING_DEV_APPROVAL" if is_promoted else "REJECTED"
     
-    metrics = {"R2_score": round(r2, 4), "MAE": round(mae, 4), "RMSE": round(rmse, 4), "status": status, "previous_champion_r2": round(r2_champion, 4)}
+    metrics = {
+        "R2_score": round(r2, 4),
+        "MAE": round(mae, 4),
+        "RMSE": round(rmse, 4),
+        "status": status,
+        "is_promoted": is_promoted,
+        "previous_champion_r2": round(r2_champion, 4),
+        "deployment_status": deployment_status,
+        "staged_experiment_dir": exp_dir
+    }
     with open(os.path.join(exp_dir, "metrics.json"), "w", encoding="utf-8") as f:
         json.dump(metrics, f, indent=4)
-        
-    if backend_dir and is_promoted:
-        os.makedirs(backend_dir, exist_ok=True)
-        shutil.copy(challenger_model_path, os.path.join(backend_dir, "best_stacking_regressor.pkl"))
-        scaler_src = os.path.join(exp_dir, "scaler.pkl")
-        if os.path.exists(scaler_src):
-            shutil.copy(scaler_src, os.path.join(backend_dir, "standard_scaler.pkl"))
         
     return metrics
 

@@ -11,5 +11,12 @@ python-dotenv>=1.0.0
 # Kiểm thử & Đánh giá chất lượng
 pytest>=7.0.0
 
+# Thư viện Khoa học dữ liệu & Machine Learning để Validator kiểm thử mã nguồn thật
+numpy>=1.24.0
+pandas>=2.0.0
+scikit-learn>=1.3.0
+
 # Biên soạn báo cáo thẩm định PDF chuyên nghiệp
 reportlab>=4.0.0
+
+langgraph-cli[inmem]>=0.1.55

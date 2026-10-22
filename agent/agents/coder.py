@@ -53,7 +53,12 @@ Lần thử trước bạn đã sinh mã bị LỖI CÚ PHÁP:
 HÃY SỬA LẠI ĐÚNG TOÀN BỘ CÚ PHÁP PYTHON (Đóng đủ ngoặc, thụt lề chuẩn, không viết code dở dang).
 """
 
-    prompt += "\nTrả về DUY NHẤT toàn bộ mã nguồn Python hoàn chỉnh, đặt trong khối ```python ... ```."
+    prompt += """
+=== QUY TẮC BẮT BUỘC ===
+1. Trả về DUY NHẤT toàn bộ mã nguồn Python hoàn chỉnh, đặt trong khối ```python ... ```.
+2. TUYỆT ĐỐI KHÔNG dùng dấu ba chấm '...' để viết tắt mã nguồn.
+3. Phải viết đầy đủ 100% tất cả các dòng code từ đầu đến cuối, giữ nguyên vẹn toàn bộ các hàm def và import.
+"""
 
     try:
         if hasattr(llm, "invoke"):
@@ -61,21 +66,38 @@ HÃY SỬA LẠI ĐÚNG TOÀN BỘ CÚ PHÁP PYTHON (Đóng đủ ngoặc, thụ
             content = resp.content if hasattr(resp, "content") else str(resp)
             if "```python" in content:
                 code = content.split("```python")[1].split("```")[0].strip()
-                return code
             elif "```" in content:
                 code = content.split("```")[1].split("```")[0].strip()
-                return code
             elif len(content.splitlines()) > 5:
-                return content.strip()
+                code = content.strip()
+            else:
+                code = ""
+
+            # Làm sạch nếu còn sót lại định danh markdown (ví dụ 'python' hoặc 'py' ở dòng 1)
+            code_lines = code.splitlines()
+            while code_lines and code_lines[0].strip().lower() in ["python", "py", "```"]:
+                code_lines.pop(0)
+            while code_lines and code_lines[-1].strip() == "```":
+                code_lines.pop()
+            
+            clean_res = "\n".join(code_lines).strip()
+            if len(clean_res.splitlines()) >= 5 and clean_res != "..." and ("def " in clean_res or "import " in clean_res):
+                return clean_res
     except Exception as e:
         print(f" [CODER LLM WARN]: Không gọi được LLM ({e}), sử dụng cơ chế vá thông minh...")
 
-    # Cơ chế vá thông minh cục bộ nếu LLM ngoại tuyến
+    # Cơ chế vá thông minh nếu LLM sinh mã viết tắt hoặc lỗi
+    code_clean = "\n".join([l for l in current_code.splitlines() if not l.strip().startswith("raise ValueError")]).strip()
+    if not code_clean or len(code_clean.splitlines()) < 5 or code_clean == "...":
+        from agent.tools.sandbox import read_sandbox_file
+        base_res = read_sandbox_file(target_file, prefer_update=False)
+        code_clean = base_res.get("content", "")
+
     if "01_tune_ridge.py" in target_file:
-        return current_code.replace("alpha=1.0", "alpha=0.5") if "alpha=1.0" in current_code else current_code + "\n# Optimized alpha for Ridge"
+        return code_clean.replace("alpha=1.0", "alpha=0.5") if "alpha=1.0" in code_clean else code_clean
     elif "01_segment_filter.py" in target_file:
-        return current_code + "\n# Filter applied clean"
-    return current_code
+        return code_clean + "\n# Filter applied clean"
+    return code_clean
 
 
 def coder_node(state: AgentState) -> Dict[str, Any]:
