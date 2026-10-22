@@ -17,9 +17,12 @@
 
 ### Demo Hệ Thống Trực Quan
 
-[![Aura Real Estate - Chatbot & AVM System Demo](docs/assets/chatbot-rag-ui.png)](docs/assets/chatbot-rag-demo.mp4)
-
-*Nhấp vào ảnh để xem video demo quy trình tư vấn bất động sản Hybrid RAG streaming và định giá tự động.*
+<div align="center">
+  <a href="docs/assets/videos/chatbot-rag-demo.mp4">
+    <img src="docs/assets/gifs/chatbot-rag-preview.gif" alt="Aura Real Estate - Chatbot & AVM System Demo Preview" width="850" />
+  </a>
+  <p><em>Nhấp vào ảnh động GIF để xem video chất lượng cao đầy đủ (MP4, 00:16) về luồng tư vấn bất động sản Hybrid RAG streaming và định giá tự động.</em></p>
+</div>
 
 [Trực quan Demo](#2-demo-trực-quan) • [Kiến trúc Hệ thống](#3-kiến-trúc-hệ-thống) • [Tính năng Nổi bật](#4-tính-năng--điểm-kỹ-thuật-nổi-bật) • [Nghiên cứu Mô hình](#5-nghiên-cứu-mô-hình--kết-quả-thực-nghiệm) • [Cài đặt & Khởi chạy](#8-cài-đặt--khởi-chạy) • [Tài liệu API](#9-hướng-dẫn-sử-dụng-api)
 
@@ -124,48 +127,115 @@ Thị trường giao dịch bất động sản nhà ở tại các đô thị l
 
 ### 2.1. Định giá Bất động sản Tự động (AVM)
 
+*Ước tính giá trị thị trường bất động sản tức thời và độ tin cậy định lượng dựa trên 14 đặc trưng vật lý và vị trí.*
+
 Hệ thống cung cấp giao diện trực quan cho phép người dùng nhập các thông số chi tiết của bất động sản (diện tích, số tầng, số phòng ngủ, phòng tắm, chiều rộng mặt tiền, bề rộng đường trước nhà, quận huyện, tình trạng pháp lý, nội thất và hướng nhà). Mô hình Stacking Regressor xử lý tức thời và trả về đơn giá theo $m^2$, giá trị ước tính tổng và biên độ tin cậy.
 
 <div align="center">
-  <img src="docs/assets/predict-valuation-ui.png" alt="Aura AVM Predict Valuation UI" width="850" />
+  <a href="docs/assets/videos/predict-valuation-demo.mp4">
+    <img src="docs/assets/gifs/predict-valuation-preview.gif" alt="Demo Định giá Bất động sản AVM Tự động" width="850" />
+  </a>
+  <p><em>Nhấp vào GIF để xem video đầy đủ (MP4, 00:08) quá trình điền thông số và nhận kết quả định giá tự động.</em></p>
+</div>
+
+<div align="center">
+  <img src="docs/assets/images/predict-valuation-ui.png" alt="Giao diện Form Định giá AVM Chi tiết" width="800" />
   <p><em>Giao diện Định giá Bất động sản Trực tuyến (AVM UI) phản hồi dự báo giá trị và biên độ tin cậy thời gian thực theo cấu trúc 14 đặc trưng vật lý và vị trí.</em></p>
 </div>
 
+> **Công nghệ phía sau:** [Xem Sơ đồ S2. Luồng Định giá Trực tuyến (AVM Inference Flow)](#s2-luồng-định-giá-trực-tuyến-avm-inference-flow)
+
+---
+
 ### 2.2. Trợ lý Tư vấn Bất động sản Stateful Hybrid RAG
+
+*Tư vấn và đề xuất bất động sản thông minh theo thời gian thực (SSE Streaming), loại bỏ hoàn toàn hiện tượng ảo giác thông tin bằng bộ lọc cứng Metadata.*
 
 Trợ lý thông minh khai thác hạ tầng suy luận vLLM kết hợp bộ lọc cứng Metadata trên ChromaDB. Hệ thống duy trì ngữ cảnh người dùng xuyên suốt thông qua bộ nhớ trượt PostgreSQL, hỗ trợ luồng truyền dữ liệu thời gian thực dạng Server-Sent Events (SSE).
 
 <div align="center">
-  <img src="docs/assets/chatbot-rag-ui.png" alt="Aura Chatbot Stateful Hybrid RAG UI" width="850" />
+  <a href="docs/assets/videos/chatbot-rag-demo.mp4">
+    <img src="docs/assets/gifs/chatbot-rag-preview.gif" alt="Demo Trợ lý Tư vấn Bất động sản Hybrid RAG Streaming" width="850" />
+  </a>
+  <p><em>Nhấp vào GIF để xem video đầy đủ (MP4, 00:16) luồng tư vấn streaming từng token kết hợp trích xuất căn nhà thực tế từ ChromaDB.</em></p>
+</div>
+
+<div align="center">
+  <img src="docs/assets/images/chatbot-rag-ui.png" alt="Giao diện Hội thoại Chatbot RAG Chi tiết" width="800" />
   <p><em>Hội thoại tư vấn bất động sản theo thời gian thực (SSE Streaming) kết hợp khả năng ghi nhớ yêu cầu vị trí và ngân sách mà không suy diễn sai thông tin thị trường.</em></p>
 </div>
 
+> **Công nghệ phía sau:** [Xem Sơ đồ S3. Luồng Chatbot Stateful Hybrid RAG](#s3-luồng-chatbot-stateful-hybrid-rag)
+
+---
+
 ### 2.3. Giám sát Suy luận LLM Thời gian thực (vLLM & Grafana)
+
+*Quan sát hiệu năng và lưu lượng suy luận của cụm mô hình ngôn ngữ lớn (vLLM Engine) theo chuẩn công nghiệp OpenMetrics.*
 
 Mọi yêu cầu suy luận gửi đến vLLM engine được giám sát thông qua cụm Prometheus và Grafana Dashboard với các chỉ số chuyên sâu: số lượng request xử lý, thời gian tạo token đầu tiên (TTFT), thông lượng sinh token (Token/s), tỷ lệ sử dụng KV Cache và kích thước hàng đợi scheduler.
 
 <div align="center">
-  <img src="docs/assets/grafana-vllm-dashboard.png" alt="vLLM Inference Observability Grafana Dashboard" width="850" />
+  <a href="docs/assets/videos/grafana-vllm-demo.mp4">
+    <img src="docs/assets/gifs/grafana-vllm-preview.gif" alt="Demo Giám sát Suy luận vLLM qua Grafana" width="850" />
+  </a>
+  <p><em>Nhấp vào GIF để xem video đầy đủ (MP4, 00:09) bảng điều khiển Grafana giám sát tải GPU, TTFT latency và KV-cache utilization.</em></p>
+</div>
+
+<div align="center">
+  <img src="docs/assets/images/grafana-vllm-dashboard.png" alt="Bảng điều khiển Giám sát vLLM Chi tiết trên Grafana" width="800" />
   <p><em>Bảng điều khiển Grafana giám sát hiệu năng suy luận mô hình vLLM theo thời gian thực, đo lường chi tiết tải GPU VRAM, TTFT latency và KV-cache utilization.</em></p>
 </div>
 
+> **Công nghệ phía sau:** [Xem Sơ đồ S9. Hạ tầng Giám sát Metrics (vLLM, Prometheus & Grafana)](#s9-hạ-tầng-giám-sát-metrics-vllm-prometheus--grafana)
+
+---
+
 ### 2.4. Vòng lặp Multi-Agent Tự hành (LangGraph Studio)
+
+*Điều phối chu trình MLOps tự hành thông qua 5 chuyên gia Agent, tự vá lỗi code micro-module trong môi trường Dual-Sandbox và hỗ trợ phê duyệt nhân sự.*
 
 Khi phát hiện suy giảm chất lượng dữ liệu hoặc pipeline bị lỗi, quy trình Multi-Agent khởi động trên nền tảng LangGraph. 5 chuyên gia Agent trao đổi trạng thái qua Blackboard State, thực hiện phân tích nguyên nhân gốc rễ, sửa đổi mã nguồn micro-module và kiểm chứng trong môi trường cô lập.
 
 <div align="center">
-  <img src="docs/assets/multiagent-langgraph-studio.png" alt="Multi-Agent Workflow in LangGraph Studio" width="850" />
+  <img src="docs/assets/images/multiagent-langgraph-studio.png" alt="Quy trình MLOps Multi-Agent trong LangGraph Studio" width="850" />
   <p><em>Sơ đồ điều phối chu trình MLOps Multi-Agent trong LangGraph Studio minh họa các trạng thái chuyển tiếp từ kiểm tra dữ liệu, sinh mã vá, chạy sandbox đến cổng phê duyệt nhân sự.</em></p>
 </div>
 
+> **Công nghệ phía sau:** [Xem Sơ đồ S5. Vòng lặp Multi-Agent Tự sửa lỗi Code & Đánh giá Model](#s5-vòng-lặp-multi-agent-tự-sửa-lỗi-code--đánh-giá-model) và [Sơ đồ S6. Cơ chế Bảo mật Dual-Sandbox](#s6-cơ-chế-bảo-mật-dual-sandbox)
+
+---
+
 ### 2.5. Báo cáo Thẩm định Mô hình Tự động qua Email
+
+*Kiểm toán độc lập và gửi email đối chiếu hiệu năng mô hình (Challenger vs. Champion) minh bạch tới kỹ sư trước khi thăng cấp lên môi trường production.*
 
 Kết thúc chu trình tái huấn luyện hoặc vá lỗi tự động, Documentation Agent tổng hợp toàn bộ bảng biểu so sánh hiệu năng (R², MAE, RMSE giữa Challenger và Champion), liệt kê các bản vá mã nguồn và gửi trực tiếp qua email cho đội ngũ MLOps xem xét trước khi thăng cấp mô hình lên production.
 
 <div align="center">
-  <img src="docs/assets/mlops-audit-email-report.png" alt="Automated MLOps Model Evaluation Email Report" width="600" />
+  <img src="docs/assets/images/mlops-audit-email-report.png" alt="Báo cáo Kiểm toán MLOps Gửi qua Email Tự động" width="600" />
   <p><em>Báo cáo đánh giá MLOps gửi qua Email tự động, đối soát minh bạch các chỉ số đo lường trước khi kích hoạt quy trình thăng cấp mô hình chính thức.</em></p>
 </div>
+
+> **Công nghệ phía sau:** [Xem Sơ đồ S5. Vòng lặp Multi-Agent](#s5-vòng-lặp-multi-agent-tự-sửa-lỗi-code--đánh-giá-model) và [Sơ đồ S10. Vòng đời Điều phối Luồng Tự động Airflow DAG](#s10-vòng-đời-điều-phối-luồng-tự-động-airflow-dag)
+
+---
+
+<details>
+<summary><b>📷 Xem thêm: Thư viện Hình ảnh & Poster Demo Hệ thống</b></summary>
+<br/>
+
+| Poster Thumbnail Định giá AVM | Poster Thumbnail Chatbot RAG |
+| :---: | :---: |
+| <img src="docs/assets/images/predict-valuation-poster.png" alt="Poster AVM" width="400"/> | <img src="docs/assets/images/chatbot-rag-poster.png" alt="Poster Chatbot" width="400"/> |
+| *Poster frame video định giá AVM (1920x1008)* | *Poster frame video chatbot RAG (1920x1008)* |
+
+| Poster Giám sát Grafana vLLM | Báo cáo Kiểm toán Email MLOps |
+| :---: | :---: |
+| <img src="docs/assets/images/grafana-vllm-poster.png" alt="Poster Grafana" width="400"/> | <img src="docs/assets/images/mlops-audit-email-report.png" alt="Email Report" width="400"/> |
+| *Poster frame video giám sát vLLM (1920x1008)* | *Ảnh chụp báo cáo email gửi cho kỹ sư MLOps* |
+
+</details>
 
 ---
 
@@ -288,6 +358,11 @@ sequenceDiagram
     UI-->>User: Hiển thị bảng định giá & khoảng tin cậy
 ```
 
+<div align="center">
+  <img src="docs/assets/images/predict-valuation-ui.png" alt="Giao diện Thực tế của Luồng Định giá S2" width="750" />
+  <p><em>Minh chứng thực tế tương ứng với luồng thiết kế S2: Giao diện AVM phản hồi dự báo giá trị tổng và đơn giá theo m² sau khi tính toán qua Stacking Regressor.</em></p>
+</div>
+
 ---
 
 ### S3. Luồng Chatbot Stateful Hybrid RAG
@@ -341,6 +416,11 @@ sequenceDiagram
     Backend->>DB: Background Task: Lưu tin nhắn mới vào chat_history
     deactivate Backend
 ```
+
+<div align="center">
+  <img src="docs/assets/images/chatbot-rag-ui.png" alt="Giao diện Thực tế của Luồng Chatbot S3" width="750" />
+  <p><em>Minh chứng thực tế tương ứng với luồng thiết kế S3: Giao diện Chatbot phản hồi streaming từng token qua SSE sau khi trích xuất bộ lọc cứng từ ChromaDB.</em></p>
+</div>
 
 ---
 
@@ -471,6 +551,11 @@ stateDiagram-v2
     PromotedToChampion --> Idle: Gửi email thông báo & kết thúc
     RejectedRollback --> Idle: Hoàn nguyên trạng thái an toàn
 ```
+
+<div align="center">
+  <img src="docs/assets/images/multiagent-langgraph-studio.png" alt="LangGraph Studio Thực tế của Luồng S5" width="800" />
+  <p><em>Minh chứng thực tế tương ứng với luồng thiết kế S5: Điều phối chu trình Multi-Agent tự hành hiển thị trực quan trong giao diện LangGraph Studio.</em></p>
+</div>
 
 ---
 
@@ -637,6 +722,11 @@ flowchart LR
     PrometheusNode -.-> METRICS_COLLECTED
 ```
 
+<div align="center">
+  <img src="docs/assets/images/grafana-vllm-dashboard.png" alt="Dashboard Grafana Thực tế của Luồng S9" width="750" />
+  <p><em>Minh chứng thực tế tương ứng với luồng thiết kế S9: Bảng điều khiển Grafana thu thập và hiển thị OpenMetrics trực tiếp từ engine vLLM.</em></p>
+</div>
+
 ---
 
 ### S10. Vòng đời Điều phối Luồng Tự động Airflow DAG
@@ -659,6 +749,11 @@ flowchart TD
 
     T3 -.->|Thất bại tại bất kỳ micro-module nào| TriggerAgent["Kích hoạt Agent Service (:2024)<br/>Tự động phân tích & đề xuất bản vá"]:::decision
 ```
+
+<div align="center">
+  <img src="docs/assets/images/mlops-audit-email-report.png" alt="Báo cáo Email Thực tế của Luồng S10" width="550" />
+  <p><em>Minh chứng thực tế tương ứng với luồng thiết kế S10: Email báo cáo thẩm định mô hình được Documentation Agent kích hoạt sau khi DAG hoàn tất.</em></p>
+</div>
 
 ---
 
