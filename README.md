@@ -97,16 +97,11 @@ Thị trường giao dịch bất động sản nhà ở tại các đô thị l
 
 ### 3 Dịch vụ Cốt lõi
 
-```
-+---------------------------------------------------------------------------------------------------+
-|                                       AURA REAL ESTATE                                            |
-+----------------------------------+----------------------------------+-----------------------------+
-|    1. Dịch vụ Định giá (AVM)     |   2. Trợ lý Hybrid RAG           |   3. Self-Healing MLOps     |
-|  - Stacking Regressor Ensembling |  - Dual-Memory Architecture      |  - 24 Micro-Modules Pipeline|
-|  - Xử lý 14 đặc trưng địa lý     |  - Hard Pre-filtering Metadata   |  - Dual-Sandbox An toàn     |
-|  - Trả khoảng giá tin cậy 95%    |  - vLLM (Qwen2.5) + Fallback     |  - Auto Code Patch & Report |
-+----------------------------------+----------------------------------+-----------------------------+
-```
+| | Dịch vụ | Làm gì | Công nghệ chính |
+| :---: | :--- | :--- | :--- |
+| **1** | **Định giá (AVM)** | Ước tính giá nhà riêng tại TP.HCM từ các thông số vật lý và vị trí, trả về giá trị ước tính và đơn giá theo m². | Stacking Ensemble (Ridge + Random Forest, meta-learner Linear Regression), log1p, kiểm soát đa cộng tuyến bằng VIF |
+| **2** | **Chatbot tư vấn** | Tìm và gợi ý nhà theo nhu cầu bằng ngôn ngữ tự nhiên, ghi nhớ ngữ cảnh qua nhiều lượt, phản hồi streaming từng token. | Stateful Metadata-Filtered Dense RAG, ChromaDB, PostgreSQL, vLLM (Gemini fallback), SSE |
+| **3** | **Multi-Agent cải tiến mô hình** | Phân tích kết quả pipeline, đề xuất bản vá hoặc cải tiến để nâng cao hiệu suất mô hình, kiểm chứng trong sandbox cô lập, so sánh Challenger với Champion và chờ con người phê duyệt. | LangGraph, Blackboard state, AST guard, Dual-Sandbox, Airflow |
 
 ### Bảng So sánh Giá trị Kỹ thuật
 
